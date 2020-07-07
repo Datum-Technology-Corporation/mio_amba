@@ -23,19 +23,19 @@
 -f ${DV_UVML_SB_PATH}/uvml_sb_pkg.flist
 
 // Agents
--f ${DV_UVMA_APB_PATH}/uvma_apb_pkg.flist
+-f ${DV_UVMA_AXIS_PATH}/uvma_axis_pkg.flist
 
 // Environments
--f ${DV_UVME_APB_ST_PATH}/uvme_apb_st_pkg.flist
+-f ${DV_UVME_AXIS_ST_PATH}/uvme_axis_st_pkg.flist
 
-// Advanced Peripheral Bus test bench Directories
-+incdir+${DV_UVMT_APB_ST_PATH}
-+incdir+${DV_UVMT_APB_ST_PATH}/tests
-+incdir+${DV_UVMT_APB_ST_PATH}/vseq
+// AMBA Advanced Extensible Interface Stream test bench Directories
+-i ${DV_UVMT_AXIS_ST_PATH}
+-i ${DV_UVMT_AXIS_ST_PATH}/tests
+-i ${DV_UVMT_AXIS_ST_PATH}/vseq
 
-// Advanced Peripheral Bus tests (includes constants/macros/types meant for test bench)
-${DV_UVMT_APB_ST_PATH}/uvmt_apb_st_pkg.sv
+// AMBA Advanced Extensible Interface Stream tests (includes constants/macros/types meant for test bench)
+${DV_UVMT_AXIS_ST_PATH}/uvmt_axis_st_pkg.sv
 
-// Advanced Peripheral Bus test bench files
-${DV_UVMT_APB_ST_PATH}/uvmt_apb_st_dut_wrap.sv
-${DV_UVMT_APB_ST_PATH}/uvmt_apb_st_tb.sv
+// AMBA Advanced Extensible Interface Stream test bench files
+${DV_UVMT_AXIS_ST_PATH}/uvmt_axis_st_dut_wrap.sv
+${DV_UVMT_AXIS_ST_PATH}/uvmt_axis_st_tb.sv

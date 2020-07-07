@@ -16,9 +16,9 @@
 
 
 // Directories
--i ${DV_UVME_APB_ST_PATH}
--i ${DV_UVME_APB_ST_PATH}/cov
--i ${DV_UVME_APB_ST_PATH}/vseq
++incdir+${DV_UVME_APB_ST_PATH}
++incdir+${DV_UVME_APB_ST_PATH}/cov
++incdir+${DV_UVME_APB_ST_PATH}/vseq
 
 // Files
 ${DV_UVME_APB_ST_PATH}/uvme_apb_st_pkg.sv

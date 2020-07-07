@@ -16,10 +16,10 @@
 
 
 // Directories
--i ${DV_UVMA_AXIS_PATH}
--i ${DV_UVMA_AXIS_PATH}/cov
--i ${DV_UVMA_AXIS_PATH}/mon_trn
--i ${DV_UVMA_AXIS_PATH}/seq
++incdir+${DV_UVMA_AXIS_PATH}
++incdir+${DV_UVMA_AXIS_PATH}/cov
++incdir+${DV_UVMA_AXIS_PATH}/mon_trn
++incdir+${DV_UVMA_AXIS_PATH}/seq
 
 // Files
 ${DV_UVMA_AXIS_PATH}/uvma_axis_pkg.sv

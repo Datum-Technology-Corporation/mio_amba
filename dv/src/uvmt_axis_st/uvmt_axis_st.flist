@@ -29,9 +29,9 @@
 -f ${DV_UVME_AXIS_ST_PATH}/uvme_axis_st_pkg.flist
 
 // AMBA Advanced Extensible Interface Stream test bench Directories
--i ${DV_UVMT_AXIS_ST_PATH}
--i ${DV_UVMT_AXIS_ST_PATH}/tests
--i ${DV_UVMT_AXIS_ST_PATH}/vseq
++incdir+${DV_UVMT_AXIS_ST_PATH}
++incdir+${DV_UVMT_AXIS_ST_PATH}/tests
++incdir+${DV_UVMT_AXIS_ST_PATH}/vseq
 
 // AMBA Advanced Extensible Interface Stream tests (includes constants/macros/types meant for test bench)
 ${DV_UVMT_AXIS_ST_PATH}/uvmt_axis_st_pkg.sv

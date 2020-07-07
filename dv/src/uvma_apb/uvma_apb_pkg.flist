@@ -16,9 +16,9 @@
 
 
 // Directories
--i ${DV_UVMA_APB_PATH}
--i ${DV_UVMA_APB_PATH}/cov
--i ${DV_UVMA_APB_PATH}/seq
++incdir+${DV_UVMA_APB_PATH}
++incdir+${DV_UVMA_APB_PATH}/cov
++incdir+${DV_UVMA_APB_PATH}/seq
 
 // Files
 ${DV_UVMA_APB_PATH}/uvma_apb_pkg.sv
