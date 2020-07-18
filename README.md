@@ -1,2 +1,2 @@
-# Moore.io AMBA DV
-Moore.io's hopper of AMBA DV agents, environments, libraries and associated testing packages.
+# Moore.io AMBA
+Moore.io's hopper of AMBA IP, VIP & Script packages.
