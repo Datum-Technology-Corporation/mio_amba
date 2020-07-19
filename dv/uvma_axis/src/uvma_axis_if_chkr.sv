@@ -16,31 +16,20 @@
 // 
 
 
-`ifndef __UVMA_AXIS_MSTR_BASE_SEQ_SV__
-`define __UVMA_AXIS_MSTR_BASE_SEQ_SV__
+`ifndef __UVMA_AXIS_IF_CHKR_SV__
+`define __UVMA_AXIS_IF_CHKR_SV__
 
 
 /**
- * TODO Describe uvma_axis_mstr_base_seq_c
+ * Encapsulates assertions targeting uvma_axis_if.
  */
-class uvma_axis_mstr_base_seq_c extends uvma_axis_base_seq_c;
+module uvma_axis_if_chkr(
+   uvma_axis_if  axis_if
+);
    
-   `uvm_object_utils(uvma_axis_mstr_base_seq_c)
+   // TODO Add assertions to uvma_axis_if_chkr
    
-   
-   /**
-    * Default constructor.
-    */
-   extern function new(string name="uvma_axis_mstr_base_seq");
-   
-endclass : uvma_axis_mstr_base_seq_c
+endmodule : uvma_axis_if_chkr
 
 
-function uvma_axis_mstr_base_seq_c::new(string name="uvma_axis_mstr_base_seq");
-   
-   super.new(name);
-   
-endfunction : new
-
-
-`endif // __UVMA_AXIS_MSTR_BASE_SEQ_SV__
+`endif // __UVMA_AXIS_IF_CHKR_SV__
