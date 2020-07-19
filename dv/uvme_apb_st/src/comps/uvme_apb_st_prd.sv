@@ -11,8 +11,8 @@
 // Unless required by applicable law or agreed to in writing, any work
 // distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-// License for the specific language governing permissions and limitations under
-// the License.
+// License for the specific language governing permissions and limitations
+// under the License.
 // 
 
 
@@ -21,8 +21,8 @@
 
 
 /**
- * Component implementing transaction-based software model of Advanced Peripheral Bus
- * VIP Self-Testing DUT.
+ * Component implementing transaction-based software model of Advanced Peripheral
+ * Bus VIP Self-Testing DUT.
  */
 class uvme_apb_st_prd_c extends uvm_component;
    
