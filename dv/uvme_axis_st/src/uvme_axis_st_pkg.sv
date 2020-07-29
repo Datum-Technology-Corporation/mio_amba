@@ -34,8 +34,9 @@
 
 
  /**
- * Encapsulates all the types needed for an UVM environment capable of
- * self-testing an AMBA Advanced Extensible Interface Stream VIP.
+ * Encapsulates all the types needed for the Moore.io UVM environment capable of
+ * self-testing the Moore.io AMBA Advanced Extensible Interface Stream (AXIS)
+ * UVM Agent.
  */
 package uvme_axis_st_pkg;
    

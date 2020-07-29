@@ -36,8 +36,8 @@
 
 
  /**
- * Encapsulates all the types needed for an UVM environment capable of
- * self-testing an Advanced Peripheral Bus VIP.
+ * Encapsulates all the types needed for the Moore.io UVM environment capable of
+ * self-testing the Moore.io Advanced Peripheral Bus (APB) UVM Agent.
  */
 package uvme_apb_st_pkg;
    

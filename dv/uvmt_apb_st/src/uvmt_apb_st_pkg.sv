@@ -39,8 +39,8 @@ timeprecision  1ps;
 
 
 /**
- * Encapsulates all the types and test cases for self-testing an
- * Advanced Peripheral Bus VIP.
+ * Encapsulates all the types and test cases for self-testing the Moore.io
+ * Advanced Peripheral Bus (APB) UVM Agent.
  */
 package uvmt_apb_st_pkg;
    

@@ -38,8 +38,9 @@ timeprecision  1ps;
 
 
 /**
- * Encapsulates all the types needed for an UVM agent capable of driving and/or
- * monitoring AMBA Advanced Extensible Interface Stream.
+ * Encapsulates all the types needed for the Moore.io UVM agent capable of
+ * driving and/or monitoring the AMBA Advanced Extensible Interface Stream
+ * (AXIS) protocol.
  */
 package uvma_axis_pkg;
    

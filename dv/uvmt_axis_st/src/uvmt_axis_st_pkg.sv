@@ -39,8 +39,8 @@ timeprecision  1ps;
 
 
 /**
- * Encapsulates all the types and test cases for self-testing an
- * AMBA Advanced Extensible Interface Stream VIP.
+ * Encapsulates all the types and test cases for self-testing the Moore.io
+ * AMBA Advanced Extensible Interface Stream (AXIS) UVM Agent.
  */
 package uvmt_axis_st_pkg;
    
