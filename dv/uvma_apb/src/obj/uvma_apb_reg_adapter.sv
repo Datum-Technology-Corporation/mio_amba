@@ -24,7 +24,7 @@
  * Object that converts between abstract register operations (UVM) and
  * Advanced Peripheral Bus operations.
  */
-class uvma_apb_reg_adapter_c extends uvm_reg_adapter;
+class uvma_apb_reg_adapter_c extends uvml_ral_reg_adapter_c;
    
    `uvm_object_utils(uvma_apb_reg_adapter_c)
    
