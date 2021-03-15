@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -53,15 +53,17 @@ package uvma_apb_pkg;
    
    // High-level transactions
    `include "uvma_apb_mon_trn.sv"
-   `include "uvma_apb_mon_trn_logger.sv"
-   `include "uvma_apb_seq_item.sv"
-   `include "uvma_apb_seq_item_logger.sv"
+   `include "uvma_apb_base_seq_item.sv"
+   `include "uvma_apb_mstr_seq_item.sv"
+   `include "uvma_apb_slv_seq_item.sv"
    
    // Agent components
    `include "uvma_apb_cov_model.sv"
    `include "uvma_apb_drv.sv"
    `include "uvma_apb_mon.sv"
    `include "uvma_apb_sqr.sv"
+   `include "uvma_apb_mon_trn_logger.sv"
+   `include "uvma_apb_seq_item_logger.sv"
    `include "uvma_apb_agent.sv"
    
    // Sequences

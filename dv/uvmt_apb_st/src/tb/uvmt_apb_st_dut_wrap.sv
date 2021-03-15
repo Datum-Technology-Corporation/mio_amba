@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -24,15 +24,19 @@
  * Module wrapper for Advanced Peripheral Bus RTL DUT. All ports are SV interfaces.
  */
 module uvmt_apb_st_dut_wrap(
-   uvma_apb_if  master_if,
-   uvma_apb_if  slave_if
+   uvma_apb_if  mstr_if,
+   uvma_apb_if  slv_if
 );
    
-   // TODO Instantiate Device Under Test (DUT)
-   //      Ex: apb_st_top  dut(
-   //             .abc(master_if.abc),
-   //             .xyz(slave_if.xyz),
-   //          );
+   assign slv_if.paddr   = mstr_if.paddr  ;
+   assign slv_if.psel    = mstr_if.psel   ;
+   assign slv_if.penable = mstr_if.penable;
+   assign slv_if.pwrite  = mstr_if.pwrite ;
+   assign slv_if.pwdata  = mstr_if.pwdata ;
+   
+   assign mstr_if.pready  = slv_if.pready ;
+   assign mstr_if.prdata  = slv_if.prdata ;
+   assign mstr_if.pslverr = slv_if.pslverr;
    
 endmodule : uvmt_apb_st_dut_wrap
 

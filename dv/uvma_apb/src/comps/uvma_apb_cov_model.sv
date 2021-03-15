@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -26,14 +26,16 @@
 class uvma_apb_cov_model_c extends uvm_component;
    
    // Objects
-   uvma_apb_cfg_c       cfg;
-   uvma_apb_cntxt_c     cntxt;
-   uvma_apb_mon_trn_c   mon_trn;
-   uvma_apb_seq_item_c  seq_item;
+   uvma_apb_cfg_c            cfg;
+   uvma_apb_cntxt_c          cntxt;
+   uvma_apb_mon_trn_c        mon_trn;
+   uvma_apb_mstr_seq_item_c  mstr_seq_item;
+   uvma_apb_slv_seq_item_c   slv_seq_item;
    
    // TLM
-   uvm_tlm_analysis_fifo#(uvma_apb_mon_trn_c )  mon_trn_fifo;
-   uvm_tlm_analysis_fifo#(uvma_apb_seq_item_c)  seq_item_fifo;
+   uvm_tlm_analysis_fifo#(uvma_apb_mon_trn_c      )  mon_trn_fifo      ;
+   uvm_tlm_analysis_fifo#(uvma_apb_mstr_seq_item_c)  mstr_seq_item_fifo;
+   uvm_tlm_analysis_fifo#(uvma_apb_slv_seq_item_c )  slv_seq_item_fifo ;
    
    
    `uvm_component_utils_begin(uvma_apb_cov_model_c)
@@ -44,30 +46,38 @@ class uvma_apb_cov_model_c extends uvm_component;
    
    // TODO Add covergroup(s) to uvma_apb_cov_model_c
    //      Ex: covergroup apb_cfg_cg;
-   //             abc_cpt : coverpoint cfg.abc;
-   //             xyz_cpt : coverpoint cfg.xyz;
+   //             abc_cp : coverpoint cfg.abc;
+   //             xyz_cp : coverpoint cfg.xyz;
    //          endgroup : apb_cfg_cg
    //          
    //          covergroup apb_cntxt_cg;
-   //             abc_cpt : coverpoint cntxt.abc;
-   //             xyz_cpt : coverpoint cntxt.xyz;
+   //             abc_cp : coverpoint cntxt.abc;
+   //             xyz_cp : coverpoint cntxt.xyz;
    //          endgroup : apb_cntxt_cg
    //          
    //          covergroup apb_mon_trn_cg;
-   //             address : coverpoint mon_trn.address {
+   //             address_cp : coverpoint mon_trn.address {
    //                bins low   = {16'h0000_0000, 16'h4FFF_FFFF};
    //                bins med   = {16'h5000_0000, 16'h9FFF_FFFF};
    //                bins high  = {16'hA000_0000, 16'hFFFF_FFFF};
    //             }
    //          endgroup : apb_mon_trn_cg
    //          
-   //          covergroup apb_seq_item_cg;
-   //             address : coverpoint seq_item.address {
+   //          covergroup apb_mstr_seq_item_cg;
+   //             address_cp : coverpoint mstr_seq_item.address {
    //                bins low   = {16'h0000_0000, 16'h5FFF_FFFF};
    //                bins med   = {16'h6000_0000, 16'hAFFF_FFFF};
    //                bins high  = {16'hB000_0000, 16'hFFFF_FFFF};
    //             }
-   //          endgroup : apb_seq_item_trn_cg
+   //          endgroup : apb_mstr_seq_item_trn_cg
+   //          
+   //          covergroup apb_slv_seq_item_cg;
+   //             address_cp : coverpoint slv_seq_item.address {
+   //                bins low   = {16'h0000_0000, 16'h5FFF_FFFF};
+   //                bins med   = {16'h6000_0000, 16'hAFFF_FFFF};
+   //                bins high  = {16'hB000_0000, 16'hFFFF_FFFF};
+   //             }
+   //          endgroup : apb_slv_seq_item_trn_cg
    
    
    /**
@@ -102,9 +112,14 @@ class uvma_apb_cov_model_c extends uvm_component;
    extern virtual function void sample_mon_trn();
    
    /**
-    * TODO Describe uvma_apb_cov_model_c::sample_seq_item()
+    * TODO Describe uvma_apb_cov_model_c::sample_mstr_seq_item()
     */
-   extern virtual function void sample_seq_item();
+   extern virtual function void sample_mstr_seq_item();
+   
+   /**
+    * TODO Describe uvma_apb_cov_model_c::sample_slv_seq_item()
+    */
+   extern virtual function void sample_slv_seq_item();
    
 endclass : uvma_apb_cov_model_c
 
@@ -130,8 +145,10 @@ function void uvma_apb_cov_model_c::build_phase(uvm_phase phase);
       `uvm_fatal("CNTXT", "Context handle is null")
    end
    
-   mon_trn_fifo  = new("mon_trn_fifo" , this);
-   seq_item_fifo = new("seq_item_fifo", this);
+   mstr_mon_trn_fifo  = new("mstr_mon_trn_fifo" , this);
+   slv_mon_trn_fifo   = new("slv_mon_trn_fifo"  , this);
+   mstr_seq_item_fifo = new("mstr_seq_item_fifo", this);
+   slv_seq_item_fifo  = new("slv_seq_item_fifo" , this);
    
 endfunction : build_phase
 
@@ -160,10 +177,16 @@ task uvma_apb_cov_model_c::run_phase(uvm_phase phase);
             sample_mon_trn();
          end
          
-         // Sequence items
+         // 'mstr' sequence items
          forever begin
-            seq_item_fifo.get(seq_item);
-            sample_seq_item();
+            mstr_seq_item_fifo.get(mstr_seq_item);
+            sample_mstr_seq_item();
+         end
+         
+         // 'slv' sequence items
+         forever begin
+            slv_seq_item_fifo.get(slv_seq_item);
+            sample_slv_seq_item();
          end
       join_none
    end
@@ -192,11 +215,18 @@ function void uvma_apb_cov_model_c::sample_mon_trn();
 endfunction : sample_mon_trn
 
 
-function void uvma_apb_cov_model_c::sample_seq_item();
+function void uvma_apb_cov_model_c::sample_mstr_seq_item();
    
-   // TODO Implement uvma_apb_cov_model_c::sample_seq_item();
+   // TODO Implement uvma_apb_cov_model_c::sample_mstr_seq_item();
    
-endfunction : sample_seq_item
+endfunction : sample_mstr_seq_item
+
+
+function void uvma_apb_cov_model_c::sample_slv_seq_item();
+   
+   // TODO Implement uvma_apb_cov_model_c::sample_slv_seq_item();
+   
+endfunction : sample_slv_seq_item
 
 
 `endif // __UVMA_APB_COV_MODEL_SV__

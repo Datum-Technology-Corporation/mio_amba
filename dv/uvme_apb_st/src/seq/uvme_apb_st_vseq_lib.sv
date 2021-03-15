@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -21,6 +21,9 @@
 
 
 `include "uvme_apb_st_base_vseq.sv"
+`include "uvme_apb_st_reads_vseq.sv"
+`include "uvme_apb_st_writes_vseq.sv""
+`include "uvme_apb_st_all_access_vseq.sv"
 
 
 /**

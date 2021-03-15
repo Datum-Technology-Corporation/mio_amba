@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -112,13 +112,13 @@ class uvmt_apb_st_base_test_c extends uvm_test;
    /**
     * Creates test_cfg and env_cfg.
     */
-   extern virtual function void create_cfg();
+   extern function void create_cfg();
    
    /**
     * 1. Calls test_cfg's process_cli_args()
     * 2. Calls randomize on 'this' and fatals out if it fails.
     */
-   extern virtual function void randomize_test();
+   extern function void randomize_test();
    
    /**
     * Configures uvml_default_hrtbt_monitor.
@@ -129,28 +129,28 @@ class uvmt_apb_st_base_test_c extends uvm_test;
     * Assigns environment configuration (env_cfg) handle to environment (env)
     * using UVM Configuration Database.
     */
-   extern virtual function void assign_cfg();
+   extern function void assign_cfg();
    
    /**
     * Creates env_cntxt.
     */
-   extern virtual function void create_cntxt();
+   extern function void create_cntxt();
    
    /**
     * Assigns environment context (env_cntxt) handle to environment (env) using
     * UVM Configuration Database.
     */
-   extern virtual function void assign_cntxt();
+   extern function void assign_cntxt();
    
    /**
     * Creates env.
     */
-   extern virtual function void create_env();
+   extern function void create_env();
    
    /**
     * Creates additional (non-environment) components (and objects).
     */
-   extern virtual function void create_components();
+   extern function void create_components();
    
    /**
     * Prints overlined and underlined text in uppercase.
@@ -160,12 +160,12 @@ class uvmt_apb_st_base_test_c extends uvm_test;
    /**
     * Starts clock generation via clknrst_gen_vif functions.
     */
-   extern virtual task start_clk();
+   extern task start_clk();
    
    /**
     * Fatals out after simulation_timeout has elapsed.
     */
-   extern virtual task simulation_timeout();
+   extern task simulation_timeout();
    
 endclass : uvmt_apb_st_base_test_c
 

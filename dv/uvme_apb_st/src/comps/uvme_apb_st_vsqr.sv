@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -34,7 +34,8 @@ class uvme_apb_st_vsqr_c extends uvm_sequencer#(
    uvme_apb_st_cntxt_c  cntxt;
    
    // Sequencer handles
-   uvma_apb_sqr_c  master_sequencer;
+   uvma_apb_sqr_c  mstr_sequencer;
+   uvma_apb_sqr_c  slv_sequencer ;
    
    
    `uvm_component_utils_begin(uvme_apb_st_vsqr_c)

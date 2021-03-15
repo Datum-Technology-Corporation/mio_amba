@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -63,8 +63,10 @@ package uvmt_apb_st_pkg;
    `include "uvmt_apb_st_test_cfg.sv"
    `include "uvmt_apb_st_base_test.sv"
    
-   // TODO Add tests
-   //      Ex: `include "uvmt_apb_st_sanity_test.sv"
+   // Tests
+   `include "uvmt_apb_st_reads_test.sv"
+   `include "uvmt_apb_st_writes_test.sv"
+   `include "uvmt_apb_st_all_access_test.sv"
    
 endpackage : uvmt_apb_st_pkg
 

@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -31,6 +31,7 @@ class uvma_apb_cntxt_c extends uvm_object;
    
    // Integrals
    uvma_apb_reset_state_enum  reset_state = UVMA_APB_RESET_STATE_PRE_RESET;
+   uvma_apb_phases_enum       mon_phase   = UVMA_APB_PHASE_INACTIVE;
    
    // Events
    uvm_event  sample_cfg_e;
@@ -39,6 +40,7 @@ class uvma_apb_cntxt_c extends uvm_object;
    
    `uvm_object_utils_begin(uvma_apb_cntxt_c)
       `uvm_field_enum(uvma_apb_reset_state_enum, reset_state, UVM_DEFAULT)
+      `uvm_field_enum(uvma_apb_phases_enum     , mon_phase  , UVM_DEFAULT)
       
       `uvm_field_event(sample_cfg_e  , UVM_DEFAULT)
       `uvm_field_event(sample_cntxt_e, UVM_DEFAULT)
@@ -70,7 +72,7 @@ endfunction : new
 
 function void uvma_apb_cntxt_c::reset();
    
-   // TODO Implement uvma_apb_cntxt_c::reset()
+   mon_phase = UVMA_APB_PHASE_INACTIVE;
    
 endfunction : reset
 

@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -25,15 +25,11 @@
  * Self-Testing DUT wrapper (uvmt_apb_st_dut_wrap).
  */
 module uvmt_apb_st_dut_chkr(
-   uvma_apb_if  master_if,
-   uvma_apb_if  slave_if
+   uvma_apb_if  mstr_if,
+   uvma_apb_if  slv_if
 );
    
-   `pragma protect begin
-   
    // TODO Add assertions to uvmt_apb_st_dut_chkr
-   
-   `pragma protect end
    
 endmodule : uvmt_apb_st_dut_chkr
 

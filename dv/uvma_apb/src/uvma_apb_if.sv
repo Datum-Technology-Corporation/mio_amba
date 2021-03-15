@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -29,23 +29,23 @@ interface uvma_apb_if (
    input  reset_n
 );
    
-   // Master-out signals
+   // 'mstr' signals
    wire [(`UVMA_APB_PADDR_MAX_SIZE-1):0]  paddr  ;
    wire [(`UVMA_APB_PSEL_MAX_SIZE -1):0]  psel   ;
    wire                                   penable;
    wire                                   pwrite ;
    wire [(`UVMA_APB_DATA_MAX_SIZE -1):0]  pwdata ;
    
-   // Slave-out signals
+   // 'slv' signals
    wire                                   pready ;
    wire [(`UVMA_APB_DATA_MAX_SIZE -1):0]  prdata ;
    wire                                   pslverr;
    
    
    /**
-    * Used by DUT in 'master' mode.
+    * Used by DUT in 'mstr' mode.
     */
-   clocking dut_master_cb @(posedge clk);
+   clocking dut_mstr_cb @(posedge clk);
       input   pready ,
               prdata ,
               pslverr;
@@ -54,12 +54,12 @@ interface uvma_apb_if (
               penable,
               pwrite ,
               pwdata ;
-   endclocking : dut_master_cb
+   endclocking : dut_mstr_cb
    
    /**
-    * Used by DUT in 'slave' mode.
+    * Used by DUT in 'slv' mode.
     */
-   clocking dut_slave_cb @(posedge clk);
+   clocking dut_slv_cb @(posedge clk);
       output  pready ,
               prdata ,
               pslverr;
@@ -68,26 +68,12 @@ interface uvma_apb_if (
               penable,
               pwrite ,
               pwdata ;
-   endclocking : dut_slave_cb
-   
-   /**
-    * Used by uvma_apb_drv_c.
-    */
-   clocking drv_master_cb @(posedge clk);
-      output  pready ,
-              prdata ,
-              pslverr;
-      input   paddr  ,
-              psel   ,
-              penable,
-              pwrite ,
-              pwdata ;
-   endclocking : drv_master_cb
+   endclocking : dut_slv_cb
    
    /**
     * Used by uvma_apb_drv_c.
     */
-   clocking drv_slave_cb @(posedge clk);
+   clocking drv_mstr_cb @(posedge clk);
       output  pready ,
               prdata ,
               pslverr;
@@ -96,7 +82,21 @@ interface uvma_apb_if (
               penable,
               pwrite ,
               pwdata ;
-   endclocking : drv_slave_cb
+   endclocking : drv_mstr_cb
+   
+   /**
+    * Used by uvma_apb_drv_c.
+    */
+   clocking drv_slv_cb @(posedge clk);
+      output  pready ,
+              prdata ,
+              pslverr;
+      input   paddr  ,
+              psel   ,
+              penable,
+              pwrite ,
+              pwdata ;
+   endclocking : drv_slv_cb
    
    /**
     * Used by uvma_apb_mon_c.
@@ -113,11 +113,11 @@ interface uvma_apb_if (
    endclocking : mon_cb
    
    
-   modport dut_master_mp   (clocking dut_master_cb);
-   modport dut_slave_mp    (clocking dut_slave_cb );
-   modport active_master_mp(clocking drv_master_cb);
-   modport active_slave_mp (clocking drv_slave_cb );
-   modport passive_mp      (clocking mon_cb       );
+   modport dut_mstr_mp   (clocking dut_mstr_cb);
+   modport dut_slv_mp    (clocking dut_slv_cb );
+   modport active_mstr_mp(clocking drv_mstr_cb);
+   modport active_slv_mp (clocking drv_slv_cb );
+   modport passive_mp    (clocking mon_cb     );
    
 endinterface : uvma_apb_if
 

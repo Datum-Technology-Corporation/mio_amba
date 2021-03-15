@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -39,8 +39,9 @@ class uvma_apb_agent_c extends uvm_agent;
    uvma_apb_mon_trn_logger_c   mon_trn_logger;
    
    // TLM
-   uvm_analysis_port#(uvma_apb_seq_item_c)  drv_ap;
-   uvm_analysis_port#(uvma_apb_mon_trn_c )  mon_ap;
+   uvm_analysis_port#(uvma_apb_mstr_seq_item_c)  drv_mstr_ap;
+   uvm_analysis_port#(uvma_apb_slv_seq_item_c )  drv_slv_ap ;
+   uvm_analysis_port#(uvma_apb_mon_trn_c      )  mon_ap     ;
    
    
    `uvm_component_utils_begin(uvma_apb_agent_c)
@@ -93,6 +94,11 @@ class uvma_apb_agent_c extends uvm_agent;
    extern function void connect_sequencer_and_driver();
    
    /**
+    * Connects monitor and driver's TLM port(s).
+    */
+   extern function void connect_monitor_and_driver();
+   
+   /**
     * Connects agent's TLM ports to driver's and monitor's.
     */
    extern function void connect_analysis_ports();
@@ -133,8 +139,9 @@ function void uvma_apb_agent_c::connect_phase(uvm_phase phase);
    
    super.connect_phase(phase);
    
+   connect_analysis_ports      ();
    connect_sequencer_and_driver();
-   connect_analysis_ports();
+   connect_monitor_and_driver  ();
    
    if (cfg.cov_model_enabled) begin
       connect_cov_model();
@@ -196,6 +203,15 @@ function void uvma_apb_agent_c::create_components();
 endfunction : create_components
 
 
+function void uvma_apb_agent_c::connect_analysis_ports();
+   
+   drv_mstr_ap = driver .mstr_ap;
+   drv_slv_ap  = driver .slv_ap ;
+   mon_ap      = monitor.ap     ;
+   
+endfunction : connect_analysis_ports
+
+
 function void uvma_apb_agent_c::connect_sequencer_and_driver();
    
    sequencer.set_arbitration(cfg.sqr_arb_mode);
@@ -204,26 +220,27 @@ function void uvma_apb_agent_c::connect_sequencer_and_driver();
 endfunction : connect_sequencer_and_driver
 
 
-function void uvma_apb_agent_c::connect_analysis_ports();
+function void uvma_apb_agent_c::connect_monitor_and_driver();
    
-   drv_ap = driver .ap;
-   mon_ap = monitor.ap;
+   monitor.drv_rsp_ap.connect(driver.mon_trn_fifo.seq_item_export);
    
-endfunction : connect_analysis_ports
+endfunction : connect_monitor_and_driver
 
 
 function void uvma_apb_agent_c::connect_cov_model();
    
-   drv_ap.connect(cov_model.seq_item_fifo.analysis_export);
-   mon_ap.connect(cov_model.mon_trn_fifo .analysis_export);
+   drv_mstr_ap.connect(cov_model.mstr_seq_item_fifo.analysis_export);
+   drv_slv_ap .connect(cov_model.slv_seq_item_fifo .analysis_export);
+   mon_ap     .connect(cov_model.mon_trn_fifo      .analysis_export);
    
 endfunction : connect_cov_model
 
 
 function void uvma_apb_agent_c::connect_trn_loggers();
    
-   drv_ap.connect(seq_item_logger.analysis_export);
-   mon_ap.connect(mon_trn_logger .analysis_export);
+   drv_mstr_ap.connect(seq_item_logger.analysis_export);
+   drv_slv_ap .connect(seq_item_logger.analysis_export);
+   mon_ap     .connect(mon_trn_logger .analysis_export);
    
 endfunction : connect_trn_loggers
 

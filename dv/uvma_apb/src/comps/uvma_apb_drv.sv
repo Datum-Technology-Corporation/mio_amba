@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -22,10 +22,11 @@
 
 /**
  * Component driving a AMBA Advanced Peripheral Bus virtual interface (uvma_apb_if).
+ * @note The req & rsp's roles are switched when this driver is in 'slv' mode.
  */
 class uvma_apb_drv_c extends uvm_driver#(
-   .REQ(uvma_apb_seq_item_c),
-   .RSP(uvma_apb_seq_item_c)
+   .REQ(uvma_apb_base_seq_item_c),
+   .RSP(uvma_apb_mon_trn_c      )
 );
    
    // Objects
@@ -33,7 +34,9 @@ class uvma_apb_drv_c extends uvm_driver#(
    uvma_apb_cntxt_c  cntxt;
    
    // TLM
-   uvm_analysis_port#(uvma_apb_seq_item_c)  ap;
+   uvm_analysis_port     #(uvma_apb_mstr_seq_item_c)  mstr_ap;
+   uvm_analysis_port     #(uvma_apb_slv_seq_item_c )  slv_ap ;
+   uvm_tlm_analysis_fifo #(uvma_apb_mon_trn_c      )  mon_trn_fifo;
    
    
    `uvm_component_utils_begin(uvma_apb_drv_c)
@@ -61,22 +64,62 @@ class uvma_apb_drv_c extends uvm_driver#(
    /**
     * Called by run_phase() while agent is in pre-reset state.
     */
-   extern virtual task drv_pre_reset(uvm_phase phase);
+   extern task drv_pre_reset(uvm_phase phase);
    
    /**
     * Called by run_phase() while agent is in reset state.
     */
-   extern virtual task drv_in_reset(uvm_phase phase);
+   extern task drv_in_reset(uvm_phase phase);
    
    /**
     * Called by run_phase() while agent is in post-reset state.
     */
-   extern virtual task drv_post_reset(uvm_phase phase);
+   extern task drv_post_reset(uvm_phase phase);
+   
+   /**
+    * TODO Describe uvma_apb_drv::get_next_req()
+    */
+   extern task get_next_req(ref uvma_apb_base_seq_item_c req);
    
    /**
     * Drives the virtual interface's (cntxt.vif) signals using req's contents.
     */
-   extern virtual task drv_req(uvma_apb_seq_item_c req);
+   extern task drv_mstr_req(uvma_apb_mstr_seq_item_c req);
+   
+   /**
+    * Drives the virtual interface's (cntxt.vif) signals using req's contents.
+    */
+   extern task drv_slv_req(uvma_apb_slv_seq_item_c req);
+   
+   /**
+    * TODO Describe uvma_apb_drv_c::wait_for_rsp()
+    */
+   extern task wait_for_rsp(uvma_apb_mon_trn_c rsp);
+   
+   /**
+    * TODO Describe uvma_apb_drv_c::process_mstr_rsp()
+    */
+   extern task process_mstr_resp(uvma_apb_slv_seq_item_c req, uvma_apb_mon_trn_c rsp);
+   
+   /**
+    * Drives the virtual interface's (cntxt.vif) signals using req's contents.
+    */
+   extern task drv_mstr_read_req(uvma_apb_mstr_seq_item_c req);
+   
+   /**
+    * Drives the virtual interface's (cntxt.vif) signals using req's contents.
+    */
+   extern task drv_mstr_write_req(uvma_apb_mstr_seq_item_c req);
+   
+   /**
+    * TODO Describe uvma_apb_drv_c::drv_mstr_idle()
+    */
+   extern task drv_mstr_idle();
+   
+   /**
+    * TODO Describe uvma_apb_drv_c::drv_slv_idle()
+    */
+   extern task drv_slv_idle();
    
 endclass : uvma_apb_drv_c
 
@@ -104,7 +147,9 @@ function void uvma_apb_drv_c::build_phase(uvm_phase phase);
    end
    uvm_config_db#(uvma_apb_cntxt_c)::set(this, "*", "cntxt", cntxt);
    
-   ap = new("ap", this);
+   mstr_ap      = new("mstr_ap"     , this);
+   slv_ap       = new("slv_ap"      , this);
+   mon_trn_fifo = new("mon_trn_fifo", this);
    
 endfunction : build_phase
 
@@ -114,13 +159,24 @@ task uvma_apb_drv_c::run_phase(uvm_phase phase);
    super.run_phase(phase);
    
    forever begin
-      wait (cfg.enabled && cfg.is_active) begin
-         case (cntxt.reset_state)
-            UVMA_APB_RESET_STATE_PRE_RESET : drv_pre_reset (phase);
-            UVMA_APB_RESET_STATE_IN_RESET  : drv_in_reset  (phase);
-            UVMA_APB_RESET_STATE_POST_RESET: drv_post_reset(phase);
-         endcase
-      end
+      wait (cfg.enabled && cfg.is_active);
+      
+      fork
+         begin
+            case (cntxt.reset_state)
+               UVMA_APB_RESET_STATE_PRE_RESET : drv_pre_reset (phase);
+               UVMA_APB_RESET_STATE_IN_RESET  : drv_in_reset  (phase);
+               UVMA_APB_RESET_STATE_POST_RESET: drv_post_reset(phase);
+               
+               default: `uvm_fatal("APB_DRV", $sformatf("Invalid reset_state: %0d", cntxt.reset_state))
+            endcase
+         end
+         
+         begin
+            wait (!(cfg.enabled && cfg.is_active));
+         end
+      join_any
+      disable fork;
    end
    
 endtask : run_phase
@@ -128,45 +184,258 @@ endtask : run_phase
 
 task uvma_apb_drv_c::drv_pre_reset(uvm_phase phase);
    
-   // TODO Implement uvma_apb_drv_c::drv_pre_reset()
-   //      Ex: @(cntxt.vif.drv_cb);
-   
-   // WARNING If no time is consumed by this task, a zero-delay oscillation loop will occur and stall simulation
+   case (cfg.drv_mode)
+      UVMA_APB_MODE_MSTR: @(cntxt.vif.dut_mstr_cb);
+      UVMA_APB_MODE_SLV : @(cntxt.vif.dut_slv_cb );
+      
+      default: `uvm_fatal("APB_DRV", $sformatf("Invalid drv_mode: %0d", cfg.drv_mode))
+   endcase
    
 endtask : drv_pre_reset
 
 
 task uvma_apb_drv_c::drv_in_reset(uvm_phase phase);
    
-   // TODO Implement uvma_apb_drv_c::drv_in_reset()
-   //      Ex: @(cntxt.vif.drv_cb);
-   
-   // WARNING If no time is consumed by this task, a zero-delay oscillation loop will occur and stall simulation
+   case (cfg.drv_mode)
+      UVMA_APB_MODE_MSTR: @(cntxt.vif.dut_mstr_cb);
+      UVMA_APB_MODE_SLV : @(cntxt.vif.dut_slv_cb );
+      
+      default: `uvm_fatal("APB_DRV", $sformatf("Invalid drv_mode: %0d", cfg.drv_mode))
+   endcase
    
 endtask : drv_in_reset
 
 
 task uvma_apb_drv_c::drv_post_reset(uvm_phase phase);
    
-   seq_item_port.get_next_item(req);
-   `uvml_hrtbt()
+   uvma_apb_mstr_seq_item_c  mstr_req;
+   uvma_apb_slv_seq_item_c   slv_req;
+   uvma_apb_mstr_mon_trn_c   mstr_rsp;
+   uvma_apb_slv_mon_trn_c    slv_rsp;
    
-   drv_req (req);
-   ap.write(req);
-   seq_item_port.item_done(req);
+   case (cfg.drv_mode)
+      UVMA_APB_MODE_MSTR: begin
+         // 1. Get next req from sequence and drive it on the vif
+         get_next_req(req);
+         if (!$cast(mstr_req, req)) begin
+            `uvm_fatal("APB_DRV", $sformatf("Could not cast 'req' (%s) to 'mstr_req' (%s)", $typename(req), $typename(mstr_req)))
+         end
+         drv_mstr_req(mstr_req);
+         
+         // 2. Wait for the monitor to send us the slv's rsp with the results of the req
+         wait_for_rsp(slv_rsp );
+         process_mstr_rsp(mstr_req, slv_rsp);
+         
+         // 3. Send out to TLM and tell sequencer we're ready for the next sequence item
+         mstr_ap.write(mstr_req);
+         seq_item_port.item_done();
+      end
+      
+      UVMA_APB_MODE_SLV: begin
+         // 1. Wait for the monitor to send us the mstr's "rsp" with an access request
+         wait_for_rsp(mstr_rsp);
+         seq_item_port.put_response(mstr_rsp);
+         
+         // 2. Get next req from sequence to reply to mstr and drive it on the vif
+         get_next_req(req);
+         if (!$cast(slv_req, req)) begin
+            `uvm_fatal("APB_DRV", $sformatf("Could not cast 'req' (%s) to 'slv_req' (%s)", $typename(req), $typename(slv_req)))
+         end
+         drv_slv_req (slv_req);
+         
+         // 3. Send out to TLM and tell sequencer we're ready for the next sequence item
+         slv_ap.write(slv_req);
+         seq_item_port.item_done();
+      end
+      
+      default: `uvm_fatal("APB_DRV", $sformatf("Invalid drv_mode: %0d", cfg.drv_mode))
+   endcase
    
 endtask : drv_post_reset
 
 
-task uvma_apb_drv_c::drv_req(uvma_apb_seq_item_c req);
+task uvma_apb_drv_c::get_next_req(ref uvma_apb_base_seq_item_c req);
    
-   // TODO Implement uvma_apb_drv_c::drv_req()
-   //      Ex: cntxt.vif.drv_cb.abc <= req.abc;
-   //          cntxt.vif.drv_cb.xyz <= req.xyz;
+   seq_item_port.get_next_item(req);
+   `uvml_hrtbt()
    
-   // WARNING If no time is consumed by this task, a zero-delay oscillation loop will occur and stall simulation
+   // Copy cfg fields
+   req.mode           = cfg.mode;
+   req.addr_bus_width = cfg.addr_bus_width;
+   req.data_bus_width = cfg.data_bus_width;
+   req.sel_width      = cfg.sel_width;
    
-endtask : drv_req
+endtask : get_next_req
+
+
+task uvma_apb_drv_c::drv_mstr_req(uvma_apb_mstr_seq_item_c req);
+   
+   case (req.access_type)
+      UVMA_APB_ACCESS_READ: begin
+         drv_mstr_read_req(req);
+      end
+      
+      UVMA_APB_ACCESS_WRITE: begin
+         drv_mstr_write_req(req);
+      end
+      
+      default: `uvm_fatal("APB_DRV", $sformatf("Invalid access_type: %0d", req.access_type))
+   endcase
+   
+endtask : drv_mstr_req
+
+
+task uvma_apb_drv_c::drv_slv_req(uvma_apb_slv_seq_item_c req);
+   
+   // Latency cycles
+   @(cntxt.vif.drv_slv_cb);
+   repeat (slv_req.latency) begin
+      @(cntxt.vif.drv_slv_cb);
+   end
+   
+   // Req data
+   cntxt.vif.drv_slv_cb.pready  <= 1'b1;
+   cntxt.vif.drv_slv_cb.pslverr <= req.slverr;
+   cntxt.vif.drv_slv_cb.prdata[(cfg.data_bus_width-1):0] <= slv_req.data[(cfg.data_bus_width-1):0];
+   
+   // Hold cycles
+   repeat (slv_req.hold_duration) begin
+      @(cntxt.vif.drv_slv_cb);
+   end
+   
+   // Idle
+   @(cntxt.vif.drv_slv_cb.clk);
+   drv_slv_idle();
+   
+endtask : drv_slv_req
+
+
+task uvma_apb_drv_c::wait_for_rsp(uvma_apb_mon_trn_c rsp);
+   
+   mon_trn_fifo.get(rsp);
+   
+endtask : wait_for_rsp
+
+
+task uvma_apb_drv_c::process_mstr_rsp(uvma_apb_mstr_seq_item_c req, uvma_apb_mon_trn_c rsp);
+   
+   req.rdata     = rsp.rdata ;
+   req.has_error = rsp.slverr;
+   
+endtask : process_mstr_resp
+
+
+task uvma_apb_drv_c::drv_mstr_read_req(uvma_apb_mstr_seq_item_c req);
+   
+   // Setup phase
+   @(cntxt.vif.drv_mstr_cb.clk);
+   cntxt.vif.drv_mstr_cb.pwrite <= 0;
+   cntxt.vif.drv_mstr_cb.paddr [(cfg.addr_bus_width-1):0] <= req.address[(cfg.addr_bus_width-1):0];
+   cntxt.vif.drv_mstr_cb.psel  [(cfg.sel_width     -1):0] <= req.slv_sel[(cfg.sel_width     -1):0];
+   
+   // Access phase
+   @(cntxt.vif.drv_mstr_cb.clk);
+   cntxt.vif.drv_mstr_cb.penable <= 1;
+   do begin
+      @(cntxt.vif.drv_mstr_cb.clk);
+   end while (cntxt.vif.drv_mstr_cb.pready !== 1'b1);
+   
+   // Finish up
+   @(cntxt.vif.drv_mstr_cb.clk);
+   cntxt.vif.drv_mstr_cb.penable <= 0;
+   drv_mstr_idle();
+   
+endtask : drv_mstr_read_req
+
+
+task uvma_apb_drv_c::drv_mstr_write_req(uvma_apb_mstr_seq_item_c req);
+   
+   // Setup phase
+   @(cntxt.vif.drv_mstr_cb.clk);
+   cntxt.vif.drv_mstr_cb.pwrite <= 1;
+   cntxt.vif.drv_mstr_cb.paddr [(cfg.addr_bus_width-1):0] <= req.address[(cfg.addr_bus_width-1):0];
+   cntxt.vif.drv_mstr_cb.psel  [(cfg.sel_width     -1):0] <= req.slv_sel[(cfg.sel_width     -1):0];
+   cntxt.vif.drv_mstr_cb.pwdata[(cfg.data_bus_width-1):0] <= req.wdata  [(cfg.data_bus_width-1):0];
+   
+   // Access phase
+   @(cntxt.vif.drv_mstr_cb.clk);
+   cntxt.vif.drv_mstr_cb.penable <= 1;
+   do begin
+      @(cntxt.vif.drv_mstr_cb.clk);
+   end while (cntxt.vif.drv_mstr_cb.pready !== 1'b1);
+   
+   // Finish up
+   @(cntxt.vif.drv_mstr_cb.clk);
+   drv_mstr_idle();
+   cntxt.vif.drv_mstr_cb.penable <= 0;
+   
+endtask : drv_mstr_read_req
+
+
+task uvma_apb_drv_c::drv_mstr_idle();
+   
+   case (cfg.drv_idle)
+      UVMA_APB_DRV_IDLE_SAME: // Do nothing;
+      
+      UVMA_APB_DRV_IDLE_ZEROS: begin
+         cntxt.vif.drv_mstr_cb.paddr [(cfg.addr_bus_width-1):0] <= '0;
+         cntxt.vif.drv_mstr_cb.psel  [(cfg.sel_width     -1):0] <= '0;
+         cntxt.vif.drv_mstr_cb.pwdata[(cfg.data_bus_width-1):0] <= '0;
+      end
+      
+      UVMA_APB_DRV_IDLE_RANDOM: begin
+         cntxt.vif.drv_mstr_cb.paddr [(cfg.addr_bus_width-1):0] <= $urandom();
+         cntxt.vif.drv_mstr_cb.psel  [(cfg.sel_width     -1):0] <= $urandom();
+         cntxt.vif.drv_mstr_cb.pwdata[(cfg.data_bus_width-1):0] <= $urandom();
+      end
+      
+      UVMA_APB_DRV_IDLE_X: begin
+         cntxt.vif.drv_mstr_cb.paddr [(cfg.addr_bus_width-1):0] <= 'X;
+         cntxt.vif.drv_mstr_cb.psel  [(cfg.sel_width     -1):0] <= 'X;
+         cntxt.vif.drv_mstr_cb.pwdata[(cfg.data_bus_width-1):0] <= 'X;
+      end
+      
+      UVMA_APB_DRV_IDLE_Z: begin
+         cntxt.vif.drv_mstr_cb.paddr [(cfg.addr_bus_width-1):0] <= 'Z;
+         cntxt.vif.drv_mstr_cb.psel  [(cfg.sel_width     -1):0] <= 'Z;
+         cntxt.vif.drv_mstr_cb.pwdata[(cfg.data_bus_width-1):0] <= 'Z;
+      end
+      
+      default: `uvm_fatal("APB_DRV", $sformatf("Invalid drv_idle: %0d", cfg.drv_idle))
+   endcase
+   
+endtask : drv_mstr_idle
+
+
+task uvma_apb_drv_c::drv_slv_idle();
+   
+   case (cfg.drv_idle)
+      UVMA_APB_DRV_IDLE_SAME: // Do nothing;
+      
+      UVMA_APB_DRV_IDLE_ZEROS: begin
+         cntxt.vif.prdata[(cfg.data_bus_width-1):0] <= '0;
+         cntxt.vif.pslverr <= 0;
+      end
+      
+      UVMA_APB_DRV_IDLE_RANDOM: begin
+         cntxt.vif.prdata[(cfg.data_bus_width-1):0] <= $urandom();
+         cntxt.vif.pslverr <= $urandom_range(0,1);
+      end
+      
+      UVMA_APB_DRV_IDLE_X: begin
+         cntxt.vif.prdata[(cfg.data_bus_width-1):0] <= 'X;
+         cntxt.vif.pslverr <= 'X;
+      end
+      
+      UVMA_APB_DRV_IDLE_Z: begin
+         cntxt.vif.prdata[(cfg.data_bus_width-1):0] <= 'Z;
+         cntxt.vif.pslverr <= 'Z;
+      end
+      
+      default: `uvm_fatal("APB_DRV", $sformatf("Invalid drv_idle: %0d", cfg.drv_idle))
+   endcase
+   
+endtask : drv_slv_idle
 
 
 `endif // __UVMA_APB_DRV_SV__

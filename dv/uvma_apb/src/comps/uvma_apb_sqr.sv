@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -21,12 +21,12 @@
 
 
 /**
- * Component running AMBA Advanced Peripheral Bus sequences extending uvma_apb_seq_base_c.
+ * Component running AMBA Advanced Peripheral Bus sequences extending uvma_apb_base_seq_c.
  * Provides sequence items for uvma_apb_drv_c.
  */
 class uvma_apb_sqr_c extends uvm_sequencer#(
-   .REQ(uvma_apb_seq_item_c),
-   .RSP(uvma_apb_seq_item_c)
+   .REQ(uvma_apb_base_seq_item_c),
+   .RSP(uvma_apb_mon_trn_c      )
 );
    
    // Objects

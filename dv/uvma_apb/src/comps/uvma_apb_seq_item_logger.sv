@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -24,9 +24,9 @@
  * Component writing AMBA Advanced Peripheral Bus sequence items debug data to disk as plain text.
  */
 class uvma_apb_seq_item_logger_c extends uvml_logs_seq_item_logger_c#(
-   .T_TRN  (uvma_apb_seq_item_c),
-   .T_CFG  (uvma_apb_cfg_c     ),
-   .T_CNTXT(uvma_apb_cntxt_c   )
+   .T_TRN  (uvma_apb_base_seq_item_c),
+   .T_CFG  (uvma_apb_cfg_c          ),
+   .T_CNTXT(uvma_apb_cntxt_c        )
 );
    
    `uvm_component_utils(uvma_apb_seq_item_logger_c)

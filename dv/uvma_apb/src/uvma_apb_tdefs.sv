@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -21,8 +21,8 @@
 
 
 typedef enum {
-   UVMA_APB_MODE_MASTER,
-   UVMA_APB_MODE_SLAVE
+   UVMA_APB_MODE_MSTR,
+   UVMA_APB_MODE_SLV
 } uvma_apb_mode_enum;
 
 typedef enum {
@@ -39,6 +39,11 @@ typedef enum {
    UVMA_APB_DRV_IDLE_Z
 } uvma_apb_drv_idle_enum;
 
+typedef enum {
+   UVMA_APB_PHASE_INACTIVE,
+   UVMA_APB_PHASE_SETUP   ,
+   UVMA_APB_PHASE_ACCESS
+} uvma_apb_phases_enum;
 
 typedef enum bit {
    UVMA_APB_ACCESS_READ  = 0,

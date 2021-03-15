@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -23,15 +23,15 @@
 `include "uvma_apb_base_seq.sv"
 `include "uvma_apb_mstr_base_seq.sv"
 `include "uvma_apb_slv_base_seq.sv"
-`include "uvma_apb_slv_ral_seq.sv"
+`include "uvma_apb_storage_slv_seq.sv"
 
 
 /**
  * Object holding sequence library for AMBA Advanced Peripheral Bus agent.
  */
 class uvma_apb_seq_lib_c extends uvm_sequence_library#(
-   .REQ(uvma_apb_seq_item_c),
-   .RSP(uvma_apb_seq_item_c)
+   .REQ(uvma_apb_base_seq_item_c),
+   .RSP(uvma_apb_base_seq_item_c)
 );
    
    `uvm_object_utils          (uvma_apb_seq_lib_c)

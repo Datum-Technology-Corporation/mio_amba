@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -24,15 +24,11 @@
  * TODO Describe uvme_apb_st_chkr
  */
 module uvme_apb_st_chkr (
-      uvma_apb_if  master_if,
-      uvma_apb_if  slave_if
+      uvma_apb_if  mstr_if,
+      uvma_apb_if  slv_if
 );
    
-   `pragma protect begin
-   
    // TODO Add assertions to uvme_apb_st_chkr
-   
-   `pragma protect end
    
 endmodule : uvme_apb_st_chkr
 

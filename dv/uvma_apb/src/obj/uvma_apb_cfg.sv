@@ -1,5 +1,5 @@
 // 
-// Copyright 2020 Datum Technology Corporation
+// Copyright 2021 Datum Technology Corporation
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 // 
 // Licensed under the Solderpad Hardware License v 2.1 (the “License”); you may
@@ -34,11 +34,12 @@ class uvma_apb_cfg_c extends uvm_object;
    rand bit                      trn_log_enabled;
    
    // Protocol parameters
-   rand uvma_apb_mode_enum      mode;
-   rand int unsigned            addr_bus_width; // Measured in bytes (B)
-   rand int unsigned            data_bus_width; // Measured in bytes (B)
-   rand int unsigned            sel_width     ; // Measured in bits  (b)
-   rand uvma_apb_drv_idle_enum  drv_idle      ;
+   rand uvma_apb_mode_enum      drv_mode;
+   rand int unsigned            addr_bus_width ; // Measured in bytes (B)
+   rand int unsigned            data_bus_width ; // Measured in bytes (B)
+   rand int unsigned            sel_width      ; // Measured in bits  (b)
+   rand uvma_apb_drv_idle_enum  drv_idle       ;
+   rand int unsigned            mon_slv_list[$];
    
    
    `uvm_object_utils_begin(uvma_apb_cfg_c)
@@ -48,11 +49,12 @@ class uvma_apb_cfg_c extends uvm_object;
       `uvm_field_int (                         cov_model_enabled, UVM_DEFAULT)
       `uvm_field_int (                         trn_log_enabled  , UVM_DEFAULT)
       
-      `uvm_field_enum(uvma_apb_mode_enum    , mode          , UVM_DEFAULT          )
-      `uvm_field_int (                        addr_bus_width, UVM_DEFAULT + UVM_DEC)
-      `uvm_field_int (                        data_bus_width, UVM_DEFAULT + UVM_DEC)
-      `uvm_field_int (                        sel_width     , UVM_DEFAULT + UVM_DEC)
-      `uvm_field_enum(uvma_apb_drv_idle_enum, drv_idle      , UVM_DEFAULT          )
+      `uvm_field_enum     (uvma_apb_mode_enum    , drv_mode      , UVM_DEFAULT          )
+      `uvm_field_int      (                        addr_bus_width, UVM_DEFAULT + UVM_DEC)
+      `uvm_field_int      (                        data_bus_width, UVM_DEFAULT + UVM_DEC)
+      `uvm_field_int      (                        sel_width     , UVM_DEFAULT + UVM_DEC)
+      `uvm_field_enum     (uvma_apb_drv_idle_enum, drv_idle      , UVM_DEFAULT          )
+      `uvm_field_queue_int(                        mon_slv_list  , UVM_DEFAULT          )
    `uvm_object_utils_end
    
    
@@ -63,11 +65,16 @@ class uvma_apb_cfg_c extends uvm_object;
       soft cov_model_enabled == 0;
       soft trn_log_enabled   == 1;
       
-      //soft     mode           == UVMA_APB_MODE_MASTER;
-      /*soft*/ addr_bus_width == uvma_apb_default_paddr_width;
-      /*soft*/ data_bus_width == uvma_apb_default_data_width ;
-      /*soft*/ sel_width      == uvma_apb_default_psel_width ;
-      /*soft*/ drv_idle       == UVMA_APB_DRV_IDLE_X;
+      /*soft*/ drv_mode        == UVMA_APB_MODE_MSTR;
+      /*soft*/ addr_bus_width  == uvma_apb_default_paddr_width;
+      /*soft*/ data_bus_width  == uvma_apb_default_data_width ;
+      /*soft*/ sel_width       == uvma_apb_default_psel_width ;
+      /*soft*/ drv_idle        == UVMA_APB_DRV_IDLE_ZEROS;
+      /*soft*/ mon_slv_list[0] == 1;
+   }
+   
+   constraint limits_cons {
+      unique {mon_slv_list};
    }
    
    
