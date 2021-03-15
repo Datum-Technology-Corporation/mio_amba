@@ -1,2 +1,2 @@
-# Moore.io AMBA Project
-Moore.io's collection of AMBA IP, VIP & Script packages.
+# Moore.io ARM Project
+Moore.io's collection of ARM IP, VIP & Script packages.
