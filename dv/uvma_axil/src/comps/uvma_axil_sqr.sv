@@ -26,7 +26,7 @@
  */
 class uvma_axil_sqr_c extends uvm_sequencer#(
    .REQ(uvma_axil_base_seq_item_c),
-   .RSP(uvma_axil_base_mon_trn_c )
+   .RSP(uvma_axil_mon_trn_c      )
 );
    
    // Objects

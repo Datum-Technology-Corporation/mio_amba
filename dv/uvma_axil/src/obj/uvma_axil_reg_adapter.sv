@@ -42,7 +42,7 @@ class uvma_axil_reg_adapter_c extends uvml_ral_reg_adapter_c;
    extern virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
    
    /**
-    * Converts from Advanced Peripheral Bus to UVM register operation.
+    * Converts from AXI-Lite to UVM register operation.
     */
    extern virtual function void bus2reg(uvm_sequence_item bus_item, ref uvm_reg_bus_op rw);
    
@@ -62,11 +62,11 @@ function uvm_sequence_item uvma_axil_reg_adapter_c::reg2bus(const ref uvm_reg_bu
    
    axil_trn.access_type = (rw.kind == UVM_READ) ? UVMA_AXIL_ACCESS_READ : UVMA_AXIL_ACCESS_WRITE;
    axil_trn.address     = rw.addr;
-   axil_trn.strobe      = {(`UVMA_AXIL_DATA_MAX_SIZE/8){1'b1}};
+   axil_trn.wstrobe     = {(`UVMA_AXIL_DATA_MAX_SIZE/8){1'b1}};
    
-   if (rw.kind == UVM_WRITE)
+   if (rw.kind == UVM_WRITE) begin
       axil_trn.wdata = rw.data;
-   endcase
+   end
    
    return axil_trn;
    
@@ -78,24 +78,24 @@ function void uvma_axil_reg_adapter_c::bus2reg(uvm_sequence_item bus_item, ref u
    uvma_axil_mstr_seq_item_c  axil_trn;
    
    if (!$cast(axil_trn, bus_item)) begin
-      `uvm_fatal("AXIL", $sformatf("Could not cast bus_item (%s) into axil_trn (%s)", $typename(bus_item), $typename(axil_trn)))
+      `uvm_fatal("AXIL_REG_ADAPTER", $sformatf("Could not cast bus_item (%s) into axil_trn (%s)", $typename(bus_item), $typename(axil_trn)))
    end
    
-   rw.kind = (axil_trn.access == UVMA_AXIL_ACCESS_READ) ? UVM_READ : UVM_WRITE;
+   rw.kind = (axil_trn.access_type == UVMA_AXIL_ACCESS_READ) ? UVM_READ : UVM_WRITE;
    rw.addr = axil_trn.address;
    
-   case (axil_trn.access)
+   case (axil_trn.access_type)
       UVMA_AXIL_ACCESS_READ : rw.data = axil_trn.rdata;
       UVMA_AXIL_ACCESS_WRITE: rw.data = axil_trn.wdata;
       
-      default: `uvm_fatal("AXIL_MON", $sformatf("Invalid access: %0d", axil_trn.access))
+      default: `uvm_fatal("AXIL_REG_ADAPTER", $sformatf("Invalid access_type: %0d", axil_trn.access_type))
    endcase
    
-   if (axil_trn.has_error) begin
-      rw.status = UVM_NOT_OK;
+   if (axil_trn.response === UVMA_AXIL_RESPONSE_OK) begin
+      rw.status = UVM_IS_OK;
    end
    else begin
-      rw.status = UVM_IS_OK;
+      rw.status = UVM_NOT_OK;
    end
    
 endfunction : bus2reg

@@ -28,24 +28,24 @@ class uvma_axil_mstr_seq_item_c extends uvma_axil_base_seq_item_c;
    // Data
    rand bit [(`UVMA_AXIL_ADDR_MAX_SIZE-1):0]      address ;
    rand bit [(`UVMA_AXIL_DATA_MAX_SIZE-1):0]      wdata   ;
+   rand bit [((`UVMA_AXIL_DATA_MAX_SIZE/8)-1):0]  wstrobe ;
         bit [(`UVMA_AXIL_DATA_MAX_SIZE-1):0]      rdata   ;
-   rand bit [((`UVMA_AXIL_DATA_MAX_SIZE/8)-1):0]  strobe  ;
         uvma_axil_response_enum                   response;
    
    // Metadata
    rand int unsigned  address_latency; ///< Measured in clock cycles
    
    
-   `uvm_object_utils_begin(uvma_axil_mon_trn_c)
+   `uvm_object_utils_begin(uvma_axil_mstr_seq_item_c)
       `uvm_field_int (                         address , UVM_DEFAULT          )
       `uvm_field_int (                         wdata   , UVM_DEFAULT          )
+      `uvm_field_int (                         wstrobe , UVM_DEFAULT + UVM_BIN)
       `uvm_field_int (                         rdata   , UVM_DEFAULT          )
-      `uvm_field_int (                         strobe  , UVM_DEFAULT + UVM_BIN)
       `uvm_field_enum(uvma_axil_response_enum, response, UVM_DEFAULT          )
       
       `uvm_field_int(addr_latency , UVM_DEFAULT + UVM_DEC)
       `uvm_field_int(data_latency , UVM_DEFAULT + UVM_DEC)
-      `uvm_field_int(resp_latency , UVM_DEFAULT + UVM_DEC)
+      `uvm_field_int(rsp_latency  , UVM_DEFAULT + UVM_DEC)
       `uvm_field_int(hold_duration, UVM_DEFAULT + UVM_DEC)
       `uvm_field_int(tail_duration, UVM_DEFAULT + UVM_DEC)
    `uvm_object_utils_end
@@ -55,12 +55,12 @@ class uvma_axil_mstr_seq_item_c extends uvma_axil_base_seq_item_c;
       soft response      == UVMA_AXIL_RESPONSE_OK;
       soft addr_latency  == 0;
       soft data_latency  == 0;
-      soft resp_latency  == 0;
+      soft rsp_latency   == 0;
       soft hold_duration == 1;
       soft tail_duration == 1;
       
-      foreach (strobe[ii]) {
-         strobe[ii] == 1'b1;
+      foreach (wstrobe[ii]) {
+         wstrobe[ii] == 1'b1;
       }
    }
    

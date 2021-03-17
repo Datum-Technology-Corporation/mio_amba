@@ -28,15 +28,27 @@ module uvmt_axil_st_dut_wrap(
    uvma_axil_if  slv_if
 );
    
-   assign slv_if.paddr   = mstr_if.paddr  ;
-   assign slv_if.psel    = mstr_if.psel   ;
-   assign slv_if.penable = mstr_if.penable;
-   assign slv_if.pwrite  = mstr_if.pwrite ;
-   assign slv_if.pwdata  = mstr_if.pwdata ;
+   assign slv_if .awaddr  = mstr_if.awaddr ;
+   assign slv_if .awvalid = mstr_if.awvalid;
+   assign mstr_if.awready = slv_if .awready;
    
-   assign mstr_if.pready  = slv_if.pready ;
-   assign mstr_if.prdata  = slv_if.prdata ;
-   assign mstr_if.pslverr = slv_if.pslverr;
+   assign slv_if .wdata  = mstr_if.wdata  ;
+   assign slv_if .wstrb  = mstr_if.wstrb  ;
+   assign slv_if .wvalid = mstr_if.wvalid ;
+   assign mstr_if.wready = slv_if .wready ;
+   
+   assign mstr_if.bresp  = slv_if .bresp ;
+   assign mstr_if.bvalid = slv_if .bvalid;
+   assign slv_if .bready = mstr_if.bready;
+   
+   assign slv_if .araddr  = mstr_if.araddr ;
+   assign slv_if .arvalid = mstr_if.arvalid;
+   assign mstr_if.arready = slv_if .arready;
+   
+   assign mstr_if.rdata  = slv_if .rdata ;
+   assign mstr_if.rresp  = slv_if .rresp ;
+   assign mstr_if.rvalid = slv_if .rvalid;
+   assign slv_if .rready = mstr_if.rready;
    
 endmodule : uvmt_axil_st_dut_wrap
 

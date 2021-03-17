@@ -34,12 +34,12 @@ class uvma_axil_base_seq_item_c extends uvml_trn_seq_item_c;
    int unsigned         data_bus_width; ///< Measured in bytes (B)
    rand int unsigned    addr_latency  ; ///< Measured in clock cycles
    rand int unsigned    data_latency  ; ///< Measured in clock cycles
-   rand int unsigned    resp_latency  ; ///< Measured in clock cycles
+   rand int unsigned    rsp_latency   ; ///< Measured in clock cycles
    rand int unsigned    hold_duration ; ///< Measured in clock cycles
    rand int unsigned    tail_duration ; ///< Measured in clock cycles
    
    
-   `uvm_object_utils_begin(uvma_axil_mon_trn_c)
+   `uvm_object_utils_begin(uvma_axil_base_seq_item_c)
       `uvm_field_enum(uvma_axil_mode_enum       , mode       , UVM_DEFAULT)
       `uvm_field_enum(uvma_axil_access_type_enum, access_type, UVM_DEFAULT)
    `uvm_object_utils_end

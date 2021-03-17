@@ -26,12 +26,12 @@
  */
 class uvma_axil_base_seq_c extends uvm_sequence#(
    .REQ(uvma_axil_base_seq_item_c),
-   .RSP(uvma_axil_base_seq_item_c)
+   .RSP(uvma_axil_mon_trn_c      )
 );
    
    // Agent handles
-   uvma_pb_cfg_c    cfg;
-   uvma_pb_cntxt_c  cntxt;
+   uvma_axil_cfg_c    cfg;
+   uvma_axil_cntxt_c  cntxt;
    
    
    `uvm_object_utils(uvma_axil_base_seq_c)
@@ -46,7 +46,7 @@ class uvma_axil_base_seq_c extends uvm_sequence#(
    /**
     * Assigns cfg and cntxt handles from p_sequencer.
     */
-   extern virtual task finish_item(uvm_sequence_item item, int set_priority=-1);
+   extern virtual task pre_start();
    
 endclass : uvma_axil_base_seq_c
 
@@ -58,7 +58,7 @@ function uvma_axil_base_seq_c::new(string name="uvma_axil_base_seq");
 endfunction : new
 
 
-task uvma_axis_base_seq_c::pre_start();
+task uvma_axil_base_seq_c::pre_start();
    
    cfg   = p_sequencer.cfg;
    cntxt = p_sequencer.cntxt;

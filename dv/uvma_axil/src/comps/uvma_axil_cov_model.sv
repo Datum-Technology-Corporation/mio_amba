@@ -99,27 +99,27 @@ class uvma_axil_cov_model_c extends uvm_component;
    /**
     * TODO Describe uvma_axil_cov_model_c::sample_cfg()
     */
-   extern virtual function void sample_cfg();
+   extern function void sample_cfg();
    
    /**
     * TODO Describe uvma_axil_cov_model_c::sample_cntxt()
     */
-   extern virtual function void sample_cntxt();
+   extern function void sample_cntxt();
    
    /**
     * TODO Describe uvma_axil_cov_model_c::sample_mon_trn()
     */
-   extern virtual function void sample_mon_trn();
+   extern function void sample_mon_trn();
    
    /**
     * TODO Describe uvma_axil_cov_model_c::sample_mstr_seq_item()
     */
-   extern virtual function void sample_mstr_seq_item();
+   extern function void sample_mstr_seq_item();
    
    /**
     * TODO Describe uvma_axil_cov_model_c::sample_slv_seq_item()
     */
-   extern virtual function void sample_slv_seq_item();
+   extern function void sample_slv_seq_item();
    
 endclass : uvma_axil_cov_model_c
 
@@ -145,8 +145,7 @@ function void uvma_axil_cov_model_c::build_phase(uvm_phase phase);
       `uvm_fatal("CNTXT", "Context handle is null")
    end
    
-   mstr_mon_trn_fifo  = new("mstr_mon_trn_fifo" , this);
-   slv_mon_trn_fifo   = new("slv_mon_trn_fifo"  , this);
+   mon_trn_fifo       = new("mon_trn_fifo"      , this);
    mstr_seq_item_fifo = new("mstr_seq_item_fifo", this);
    slv_seq_item_fifo  = new("slv_seq_item_fifo" , this);
    

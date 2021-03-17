@@ -99,27 +99,27 @@ class uvma_apb_cov_model_c extends uvm_component;
    /**
     * TODO Describe uvma_apb_cov_model_c::sample_cfg()
     */
-   extern virtual function void sample_cfg();
+   extern function void sample_cfg();
    
    /**
     * TODO Describe uvma_apb_cov_model_c::sample_cntxt()
     */
-   extern virtual function void sample_cntxt();
+   extern function void sample_cntxt();
    
    /**
     * TODO Describe uvma_apb_cov_model_c::sample_mon_trn()
     */
-   extern virtual function void sample_mon_trn();
+   extern function void sample_mon_trn();
    
    /**
     * TODO Describe uvma_apb_cov_model_c::sample_mstr_seq_item()
     */
-   extern virtual function void sample_mstr_seq_item();
+   extern function void sample_mstr_seq_item();
    
    /**
     * TODO Describe uvma_apb_cov_model_c::sample_slv_seq_item()
     */
-   extern virtual function void sample_slv_seq_item();
+   extern function void sample_slv_seq_item();
    
 endclass : uvma_apb_cov_model_c
 

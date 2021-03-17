@@ -290,7 +290,7 @@ task uvma_axil_mon_c::mon_read(output uvma_axil_mon_trn_c trn);
    
    // Capture response
    trn.timestamp_end = $realtime();
-   trn.response = cntxt.vif.rresp;
+   trn.response = uvma_axil_response_enum'(cntxt.vif.mon_cb.rresp);
    
    
 endtask : mon_read
@@ -346,7 +346,7 @@ task uvma_axil_mon_c::mon_write(output uvma_axil_mon_trn_c trn);
    
    // Capture response
    trn.timestamp_end = $realtime();
-   trn.response = cntxt.vif.rresp;
+   trn.response = uvma_axil_response_enum'(cntxt.vif.mon_cb.rresp);
    
 endtask : mon_write
 
@@ -377,8 +377,13 @@ task uvma_axil_mon_c::sample_read_trn_from_vif(output uvma_axil_mon_trn_c trn);
    
    trn.timestamp_start = $realtime();
    trn.access_type = UVMA_AXIL_ACCESS_READ;
-   trn.address[(cfg.addr_bus_width-1):0] = cntxt.vif.araddr[(cfg.addr_bus_width-1):0];
-   trn.data[(cfg.data_bus_width-1):0] = cntxt.vif.rdata [(cfg.data_bus_width-1):0];
+   
+   for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
+      trn.address[ii] = cntxt.vif.mon_cb.araddr[ii];
+   end
+   for (int unsigned ii=0; ii<cfg.data_bus_width; ii++) begin
+      trn.data[ii] = cntxt.vif.mon_cb.rdata[ii];
+   end
    
 endtask : sample_read_trn_from_vif
 
@@ -387,9 +392,16 @@ task uvma_axil_mon_c::sample_write_trn_from_vif(output uvma_axil_mon_trn_c trn);
    
    trn.timestamp_start = $realtime();
    trn.access_type = UVMA_AXIL_ACCESS_WRITE;
-   trn.address[(cfg.addr_bus_width  -1):0] = cntxt.vif.araddr[(cfg.addr_bus_width  -1):0];
-   trn.strobe [(cfg.strobe_bus_width-1):0] = cntxt.vif.strobe[(cfg.strobe_bus_width-1):0];
-   trn.data   [(cfg.data_bus_width  -1):0] = cntxt.vif.wdata [(cfg.data_bus_width  -1):0];
+   
+   for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
+      trn.address[ii] = cntxt.vif.mon_cb.awaddr[ii];
+   end
+   for (int unsigned ii=0; ii<cfg.strobe_bus_width; ii++) begin
+      trn.strobe[ii] = cntxt.vif.mon_cb.wstrb[ii];
+   end
+   for (int unsigned ii=0; ii<cfg.data_bus_width; ii++) begin
+      trn.data[ii] = cntxt.vif.mon_cb.wdata[ii];
+   end
    
 endtask : sample_write_trn_from_vif
 

@@ -42,6 +42,7 @@ package uvma_axil_pkg;
    import uvml_hrtbt_pkg::*;
    import uvml_trn_pkg  ::*;
    import uvml_logs_pkg ::*;
+   import uvml_ral_pkg  ::*;
    
    // Constants / Structs / Enums
    `include "uvma_axil_constants.sv"

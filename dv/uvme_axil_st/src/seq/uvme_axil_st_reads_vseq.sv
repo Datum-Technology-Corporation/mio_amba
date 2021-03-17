@@ -25,8 +25,8 @@
  */
 class uvme_axil_st_reads_vseq_c extends uvme_axil_st_base_vseq_c;
    
-   rand uvma_axil_mock_slv_seq_c  slv_seq;
-   rand int unsigned             num_reads;
+   rand uvma_axil_storage_slv_seq_c  slv_seq;
+   rand int unsigned                 num_reads;
    
    
    `uvm_object_utils_begin(uvme_axil_st_reads_vseq_c)
@@ -73,7 +73,6 @@ task uvme_axil_st_reads_vseq_c::body();
          repeat (num_reads) begin
             `uvm_do_on_with(_req, p_sequencer.mstr_sequencer, {
                access_type == UVMA_AXIL_ACCESS_READ;
-               slv_sel     == inside {cfg.mon_slv_list};
             })
          end
       end

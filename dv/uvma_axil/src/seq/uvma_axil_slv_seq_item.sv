@@ -34,13 +34,13 @@ class uvma_axil_slv_seq_item_c extends uvma_axil_base_seq_item_c;
    rand int unsigned  resp_latency ; ///< Measured in clock cycles
    
    
-   `uvm_object_utils_begin(uvma_axil_mon_trn_c)
+   `uvm_object_utils_begin(uvma_axil_slv_seq_item_c)
       `uvm_field_int (                         rdata   , UVM_DEFAULT)
       `uvm_field_enum(uvma_axil_response_enum, response, UVM_DEFAULT)
       
       `uvm_field_int(addr_latency , UVM_DEFAULT + UVM_DEC)
       `uvm_field_int(data_latency , UVM_DEFAULT + UVM_DEC)
-      `uvm_field_int(resp_latency , UVM_DEFAULT + UVM_DEC)
+      `uvm_field_int(rsp_latency  , UVM_DEFAULT + UVM_DEC)
       `uvm_field_int(hold_duration, UVM_DEFAULT + UVM_DEC)
       `uvm_field_int(tail_duration, UVM_DEFAULT + UVM_DEC)
    `uvm_object_utils_end
@@ -50,7 +50,7 @@ class uvma_axil_slv_seq_item_c extends uvma_axil_base_seq_item_c;
       soft response      == UVMA_AXIL_RESPONSE_OK;
       soft addr_latency  == 1;
       soft data_latency  == 1;
-      soft resp_latency  == 1;
+      soft rsp_latency   == 1;
       soft hold_duration == 1;
       soft tail_duration == 1;
    }

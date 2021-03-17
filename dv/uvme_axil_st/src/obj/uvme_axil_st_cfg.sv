@@ -93,14 +93,9 @@ class uvme_axil_st_cfg_c extends uvm_object;
    constraint agents_protocol_cons {
       mstr_cfg.addr_bus_width == slv_cfg.addr_bus_width;
       mstr_cfg.data_bus_width == slv_cfg.data_bus_width;
-      mstr_cfg.sel_width      == slv_cfg.sel_width     ;
       
       mstr_cfg.drv_mode == UVMA_AXIL_MODE_MSTR;
       slv_cfg .drv_mode == UVMA_AXIL_MODE_SLV ;
-      
-      foreach (mstr_cfg.mon_slv_list[ii]) {
-         slv_cfg.mon_slv_list[ii] == mstr_cfg.mon_slv_list[ii];
-      }
    }
    
    constraint sb_cfg_cons {

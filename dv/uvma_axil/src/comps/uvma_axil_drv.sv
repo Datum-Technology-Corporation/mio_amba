@@ -21,11 +21,12 @@
 
 
 /**
- * Component driving a AMBA Advanced eXtensible Interface virtual interface (uvma_axil_if).
+ * Component driving an AMBA Advanced eXtensible Interface virtual interface
+ * (uvma_axil_if).
  */
 class uvma_axil_drv_c extends uvm_driver#(
    .REQ(uvma_axil_base_seq_item_c),
-   .RSP(uvma_axil_base_mon_trn_c )
+   .RSP(uvma_axil_mon_trn_c      )
 );
    
    // Objects
@@ -78,6 +79,11 @@ class uvma_axil_drv_c extends uvm_driver#(
    /**
     * Drives the interface's (cntxt.vif) signals using req's contents.
     */
+   extern task get_next_item(output uvma_axil_mstr_seq_item_c req);
+   
+   /**
+    * Drives the interface's (cntxt.vif) signals using req's contents.
+    */
    extern task drv_mstr_req(uvma_axil_mstr_seq_item_c req);
    
    /**
@@ -103,7 +109,7 @@ class uvma_axil_drv_c extends uvm_driver#(
    /**
     * TODO Describe uvma_axil_drv_c::process_mstr_rsp()
     */
-   extern task process_mstr_resp(uvma_axil_slv_seq_item_c req, uvma_axil_mon_trn_c rsp);
+   extern task process_mstr_rsp(uvma_axil_mstr_seq_item_c req, uvma_axil_mon_trn_c rsp);
    
    /**
     * Drives the interface's (cntxt.vif) signals using req's contents.
@@ -118,7 +124,7 @@ class uvma_axil_drv_c extends uvm_driver#(
    /**
     * TODO Describe uvma_axil_drv_c::drv_mstr_idle()
     */
-   extern task drv_mstr_idle();
+   extern task drv_mstr_idle(uvma_axil_access_type_enum access_type);
    
    /**
     * TODO Describe uvma_axil_drv_c::drv_slv_idle()
@@ -214,13 +220,13 @@ task uvma_axil_drv_c::drv_post_reset(uvm_phase phase);
    
    uvma_axil_mstr_seq_item_c  mstr_req;
    uvma_axil_slv_seq_item_c   slv_req;
-   uvma_axil_mstr_mon_trn_c   mstr_rsp;
-   uvma_axil_slv_mon_trn_c    slv_rsp;
+   uvma_axil_mon_trn_c        mstr_rsp;
+   uvma_axil_mon_trn_c        slv_rsp;
    
    case (cfg.drv_mode)
       UVMA_AXIL_MODE_MSTR: begin
          // 1. Get next req from sequence and drive it on the vif
-         get_next_req(req);
+         get_next_item(req);
          if (!$cast(mstr_req, req)) begin
             `uvm_fatal("AXIL_DRV", $sformatf("Could not cast 'req' (%s) to 'mstr_req' (%s)", $typename(req), $typename(mstr_req)))
          end
@@ -241,7 +247,7 @@ task uvma_axil_drv_c::drv_post_reset(uvm_phase phase);
          seq_item_port.put_response(mstr_rsp);
          
          // 2. Get next req from sequence to reply to mstr and drive it on the vif
-         get_next_req(req);
+         get_next_item(req);
          if (!$cast(slv_req, req)) begin
             `uvm_fatal("AXIL_DRV", $sformatf("Could not cast 'req' (%s) to 'slv_req' (%s)", $typename(req), $typename(slv_req)))
          end
@@ -258,13 +264,13 @@ task uvma_axil_drv_c::drv_post_reset(uvm_phase phase);
 endtask : drv_post_reset
 
 
-task uvma_axil_drv_c::get_next_item(ref uvma_axil_base_seq_item_c req);
+task uvma_axil_drv_c::get_next_item(output uvma_axil_base_seq_item_c req);
    
    seq_item_port.get_next_item(req);
    `uvml_hrtbt()
    
    // Copy cfg fields
-   req.mode           = cfg.mode;
+   req.mode           = cfg.drv_mode;
    req.addr_bus_width = cfg.addr_bus_width;
    req.data_bus_width = cfg.data_bus_width;
    
@@ -300,7 +306,9 @@ task uvma_axil_drv_c::drv_mstr_read_req(uvma_axil_mstr_seq_item_c req);
          end
          // Address phase
          cntxt.vif.drv_mstr_cb.arvalid <= 1'b1;
-         cntxt.vif.drv_mstr_cb.araddr[(cfg.addr_bus_width-1):0] <= req.address[(cfg.addr_bus_width-1):0];
+         for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
+            cntxt.vif.drv_mstr_cb.araddr[ii] <= req.address[ii];
+         end
       end
       
       // Data Channel
@@ -351,7 +359,9 @@ task uvma_axil_drv_c::drv_mstr_write_req(uvma_axil_mstr_seq_item_c req);
          end
          // Address phase
          cntxt.vif.drv_mstr_cb.awvalid <= 1'b1;
-         cntxt.vif.drv_mstr_cb.awaddr[(cfg.addr_bus_width-1):0] <= req.address[(cfg.addr_bus_width-1):0];
+         for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
+            cntxt.vif.drv_mstr_cb.awaddr[ii] <= req.address[ii];
+         end
          
          // Wait for 'slv' ready
          while (cntxt.vif.drv_mstr_cb.awready !== 1'b1) begin
@@ -366,8 +376,12 @@ task uvma_axil_drv_c::drv_mstr_write_req(uvma_axil_mstr_seq_item_c req);
             @(cntxt.vif.drv_mstr_cb);
          end
          cntxt.vif.drv_mstr_cb.wvalid <= 1'b1;
-         cntxt.vif.drv_mstr_cb.wdata[(cfg.addr_bus_width  -1):0] <= req.wdata [(cfg.addr_bus_width  -1):0];
-         cntxt.vif.drv_mstr_cb.wstrb[(cfg.strobe_bus_width-1):0] <= req.strobe[(cfg.strobe_bus_width-1):0];
+         for (int unsigned ii=0; ii<cfg.data_bus_width; ii++) begin
+            cntxt.vif.drv_mstr_cb.wdata[ii] <= req.wdata[ii];
+         end
+         for (int unsigned ii=0; ii<cfg.strobe_bus_width; ii++) begin
+            cntxt.vif.drv_mstr_cb.wstrb[ii] <= req.wstrobe[ii];
+         end
          
          // Wait for 'slv' ready
          while (cntxt.vif.drv_mstr_cb.wready !== 1'b1) begin
@@ -378,7 +392,7 @@ task uvma_axil_drv_c::drv_mstr_write_req(uvma_axil_mstr_seq_item_c req);
       // Response Channel
       begin
          // Latency cycles
-         repeat (req.resp_latency) begin
+         repeat (req.rsp_latency) begin
             @(cntxt.vif.drv_mstr_cb);
          end
          cntxt.vif.drv_mstr_cb.bready <= 1'b1;
@@ -404,7 +418,7 @@ task uvma_axil_drv_c::drv_mstr_write_req(uvma_axil_mstr_seq_item_c req);
       @(cntxt.vif.drv_mstr_cb);
    end
    
-endtask : drv_mstr_read_req
+endtask : drv_mstr_write_req
 
 
 task uvma_axil_drv_c::drv_slv_req(uvma_axil_slv_seq_item_c req);
@@ -443,16 +457,18 @@ task uvma_axil_drv_c::drv_slv_read_req(uvma_axil_slv_seq_item_c req);
    end
    cntxt.vif.drv_slv_cb.rvalid <= 1'b1;
    cntxt.vif.drv_slv_cb.rresp  <= req.response;
-   cntxt.vif.drv_slv_cb.rdata[(cfg.data_bus_width-1):0] <= req.data[(cfg.data_bus_width-1):0];
+   for (int unsigned ii=0; ii<cfg.data_bus_width; ii++) begin
+      cntxt.vif.drv_slv_cb.rdata[ii] <= req.rdata[ii];
+   end
    
    // Hold cycles
-   repeat (req.duration) begin
+   repeat (req.hold_duration) begin
       @(cntxt.vif.drv_slv_cb);
    end
    
    // Idle
    repeat (req.tail_duration) begin
-      @(cntxt.vif.drv_slv_cb.clk);
+      @(cntxt.vif.drv_slv_cb);
       drv_slv_idle(UVMA_AXIL_ACCESS_READ);
    end
    
@@ -495,20 +511,20 @@ task uvma_axil_drv_c::drv_slv_write_req(uvma_axil_slv_seq_item_c req);
    end
    
    // Response latency
-   repeat (slv_req.resp_latency) begin
+   repeat (req.rsp_latency) begin
       @(cntxt.vif.drv_slv_cb);
    end
    
    // Write back response and hold cycles
    cntxt.vif.drv_slv_cb.bvalid <= 1'b1;
    cntxt.vif.drv_slv_cb.bresp  <= req.response;
-   repeat (slv_req.hold_duration) begin
+   repeat (req.hold_duration) begin
       @(cntxt.vif.drv_slv_cb);
    end
    
    // Idle
    repeat (req.tail_duration) begin
-      @(cntxt.vif.drv_slv_cb.clk);
+      @(cntxt.vif.drv_slv_cb);
       drv_slv_idle(UVMA_AXIL_ACCESS_WRITE);
    end
    
@@ -524,24 +540,23 @@ endtask : wait_for_rsp
 
 task uvma_axil_drv_c::process_mstr_rsp(uvma_axil_mstr_seq_item_c req, uvma_axil_mon_trn_c rsp);
    
-   req.rdata     = rsp.rdata ;
+   req.rdata     = rsp.data ;
    req.response  = rsp.response;
-   req.has_error = |rsp.response;
    
-endtask : process_mstr_resp
+endtask : process_mstr_rsp
 
 
-task uvma_axil_drv_c::drv_mstr_idle();
+task uvma_axil_drv_c::drv_mstr_idle(uvma_axil_access_type_enum access_type);
    
    case (access_type)
       UVMA_AXIL_ACCESS_READ: begin
          case (cfg.drv_idle)
-            UVMA_AXIL_DRV_IDLE_SAME: // Do nothing;
+            UVMA_AXIL_DRV_IDLE_SAME: ;// Do nothing;
             
-            UVMA_AXIL_DRV_IDLE_ZEROS : cntxt.vif.araddr[(cfg.addr_bus_width-1):0] <= '0;
-            UVMA_AXIL_DRV_IDLE_RANDOM: cntxt.vif.araddr[(cfg.addr_bus_width-1):0] <= $urandom();
-            UVMA_AXIL_DRV_IDLE_X     : cntxt.vif.araddr[(cfg.addr_bus_width-1):0] <= 'X;
-            UVMA_AXIL_DRV_IDLE_Z     : cntxt.vif.araddr[(cfg.addr_bus_width-1):0] <= 'Z;
+            UVMA_AXIL_DRV_IDLE_ZEROS : cntxt.vif.drv_mstr_cb.araddr <= '0;
+            UVMA_AXIL_DRV_IDLE_RANDOM: cntxt.vif.drv_mstr_cb.araddr <= $urandom();
+            UVMA_AXIL_DRV_IDLE_X     : cntxt.vif.drv_mstr_cb.araddr <= 'X;
+            UVMA_AXIL_DRV_IDLE_Z     : cntxt.vif.drv_mstr_cb.araddr <= 'Z;
             
             default: `uvm_fatal("AXIL_DRV", $sformatf("Invalid drv_idle: %0d", cfg.drv_idle))
          endcase
@@ -549,30 +564,30 @@ task uvma_axil_drv_c::drv_mstr_idle();
       
       UVMA_AXIL_ACCESS_WRITE: begin
          case (cfg.drv_idle)
-            UVMA_AXIL_DRV_IDLE_SAME: // Do nothing;
+            UVMA_AXIL_DRV_IDLE_SAME: ;// Do nothing;
             
             UVMA_AXIL_DRV_IDLE_ZEROS: begin
-               cntxt.vif.awaddr[(cfg.addr_bus_width  -1):0] <= '0;
-               cntxt.vif.wdata [(cfg.data_bus_width  -1):0] <= '0;
-               cntxt.vif.wstrb [(cfg.strobe_bus_width-1):0] <= '0;
+               cntxt.vif.drv_mstr_cb.awaddr <= '0;
+               cntxt.vif.drv_mstr_cb.wdata  <= '0;
+               cntxt.vif.drv_mstr_cb.wstrb  <= '0;
             end
             
             UVMA_AXIL_DRV_IDLE_RANDOM: begin
-               cntxt.vif.araddr[(cfg.addr_bus_width  -1):0] <= $urandom();
-               cntxt.vif.wdata [(cfg.data_bus_width  -1):0] <= $urandom();
-               cntxt.vif.wstrb [(cfg.strobe_bus_width-1):0] <= $urandom();
+               cntxt.vif.drv_mstr_cb.araddr <= $urandom();
+               cntxt.vif.drv_mstr_cb.wdata  <= $urandom();
+               cntxt.vif.drv_mstr_cb.wstrb  <= $urandom();
             end
             
             UVMA_AXIL_DRV_IDLE_X: begin
-               cntxt.vif.araddr[(cfg.addr_bus_width  -1):0] <= 'X;
-               cntxt.vif.wdata [(cfg.data_bus_width  -1):0] <= 'X;
-               cntxt.vif.wstrb [(cfg.strobe_bus_width-1):0] <= 'X;
+               cntxt.vif.drv_mstr_cb.araddr <= 'X;
+               cntxt.vif.drv_mstr_cb.wdata  <= 'X;
+               cntxt.vif.drv_mstr_cb.wstrb  <= 'X;
             end
             
             UVMA_AXIL_DRV_IDLE_Z: begin
-               cntxt.vif.araddr[(cfg.addr_bus_width  -1):0] <= 'Z;
-               cntxt.vif.wdata [(cfg.data_bus_width  -1):0] <= 'Z;
-               cntxt.vif.wstrb [(cfg.strobe_bus_width-1):0] <= 'Z;
+               cntxt.vif.drv_mstr_cb.araddr <= 'Z;
+               cntxt.vif.drv_mstr_cb.wdata  <= 'Z;
+               cntxt.vif.drv_mstr_cb.wstrb  <= 'Z;
             end
             
             default: `uvm_fatal("AXIL_DRV", $sformatf("Invalid drv_idle: %0d", cfg.drv_idle))
@@ -589,30 +604,30 @@ task uvma_axil_drv_c::drv_slv_idle(uvma_axil_access_type_enum access_type);
    
    case (access_type)
       UVMA_AXIL_ACCESS_READ: begin
-         cntxt.vif.arready <= '0;
-         cntxt.vif.rvalid  <= '0;
+         cntxt.vif.drv_slv_cb.arready <= '0;
+         cntxt.vif.drv_slv_cb.rvalid  <= '0;
          
          case (cfg.drv_idle)
-            UVMA_AXIL_DRV_IDLE_SAME: // Do nothing;
+            UVMA_AXIL_DRV_IDLE_SAME: ;// Do nothing;
             
             UVMA_AXIL_DRV_IDLE_ZEROS: begin
-               cntxt.vif.rdata[(cfg.data_bus_width-1):0] <= '0;
-               cntxt.vif.rresp <= '0;
+               cntxt.vif.drv_slv_cb.rdata <= '0;
+               cntxt.vif.drv_slv_cb.rresp <= '0;
             end
             
             UVMA_AXIL_DRV_IDLE_RANDOM: begin
-               cntxt.vif.rdata[(cfg.data_bus_width-1):0] <= $urandom();
-               cntxt.vif.rresp <= $urandom();
+               cntxt.vif.drv_slv_cb.rdata <= $urandom();
+               cntxt.vif.drv_slv_cb.rresp <= $urandom();
             end
             
             UVMA_AXIL_DRV_IDLE_X: begin
-               cntxt.vif.rdata[(cfg.data_bus_width-1):0] <= 'X;
-               cntxt.vif.rresp <= 'X;
+               cntxt.vif.drv_slv_cb.rdata <= 'X;
+               cntxt.vif.drv_slv_cb.rresp <= 'X;
             end
             
             UVMA_AXIL_DRV_IDLE_Z: begin
-               cntxt.vif.rdata[(cfg.data_bus_width-1):0] <= 'Z;
-               cntxt.vif.rresp <= 'Z;
+               cntxt.vif.drv_slv_cb.rdata <= 'Z;
+               cntxt.vif.drv_slv_cb.rresp <= 'Z;
             end
             
             default: `uvm_fatal("AXIL_DRV", $sformatf("Invalid drv_idle: %0d", cfg.drv_idle))
@@ -620,16 +635,16 @@ task uvma_axil_drv_c::drv_slv_idle(uvma_axil_access_type_enum access_type);
       end
       
       UVMA_AXIL_ACCESS_WRITE: begin
-         cntxt.vif.awready <= '0;
-         cntxt.vif.wready  <= '0;
-         cntxt.vif.bvalid  <= '0;
+         cntxt.vif.drv_slv_cb.awready <= '0;
+         cntxt.vif.drv_slv_cb.wready  <= '0;
+         cntxt.vif.drv_slv_cb.bvalid  <= '0;
          
          case (cfg.drv_idle)
             UVMA_AXIL_DRV_IDLE_SAME  : ;// Do nothing;
-            UVMA_AXIL_DRV_IDLE_ZEROS : cntxt.vif.bresp <= '0;
-            UVMA_AXIL_DRV_IDLE_RANDOM: cntxt.vif.bresp <= $urandom();
-            UVMA_AXIL_DRV_IDLE_X     : cntxt.vif.bresp <= 'X;
-            UVMA_AXIL_DRV_IDLE_Z     : cntxt.vif.bresp <= 'Z;
+            UVMA_AXIL_DRV_IDLE_ZEROS : cntxt.vif.drv_slv_cb.bresp <= '0;
+            UVMA_AXIL_DRV_IDLE_RANDOM: cntxt.vif.drv_slv_cb.bresp <= $urandom();
+            UVMA_AXIL_DRV_IDLE_X     : cntxt.vif.drv_slv_cb.bresp <= 'X;
+            UVMA_AXIL_DRV_IDLE_Z     : cntxt.vif.drv_slv_cb.bresp <= 'Z;
             
             default: `uvm_fatal("AXIL_DRV", $sformatf("Invalid drv_idle: %0d", cfg.drv_idle))
          endcase

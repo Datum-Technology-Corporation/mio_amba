@@ -33,7 +33,7 @@ class uvma_apb_mstr_seq_item_c extends uvma_apb_base_seq_item_c;
    rand bit [(`UVMA_APB_PSEL_MAX_SIZE -1):0]  slv_sel    ;
    
    
-   `uvm_object_utils_begin(uvma_apb_mon_trn_c)
+   `uvm_object_utils_begin(uvma_apb_mstr_seq_item_c)
       `uvm_field_enum(uvma_apb_access_type_enum, access_type, UVM_DEFAULT          )
       `uvm_field_int (                           address    , UVM_DEFAULT          )
       `uvm_field_int (                           wdata      , UVM_DEFAULT          )

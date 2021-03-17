@@ -222,7 +222,7 @@ endfunction : connect_sequencer_and_driver
 
 function void uvma_axil_agent_c::connect_monitor_and_driver();
    
-   monitor.drv_rsp_ap.connect(driver.mon_trn_fifo.seq_item_export);
+   monitor.drv_rsp_ap.connect(driver.mon_trn_fifo.analysis_export);
    
 endfunction : connect_monitor_and_driver
 

@@ -48,12 +48,11 @@ class uvma_axil_cfg_c extends uvm_object;
       `uvm_field_int (                         cov_model_enabled, UVM_DEFAULT)
       `uvm_field_int (                         trn_log_enabled  , UVM_DEFAULT)
       
-      `uvm_field_enum     (uvma_axil_mode_enum    , drv_mode        , UVM_DEFAULT          )
-      `uvm_field_int      (                         addr_bus_width  , UVM_DEFAULT + UVM_DEC)
-      `uvm_field_int      (                         data_bus_width  , UVM_DEFAULT + UVM_DEC)
-      `uvm_field_int      (                         strobe_bus_width, UVM_DEFAULT + UVM_DEC)
-      `uvm_field_enum     (uvma_axil_drv_idle_enum, drv_idle        , UVM_DEFAULT          )
-      `uvm_field_queue_int(                         mon_slv_list    , UVM_DEFAULT          )
+      `uvm_field_enum(uvma_axil_mode_enum    , drv_mode        , UVM_DEFAULT          )
+      `uvm_field_int (                         addr_bus_width  , UVM_DEFAULT + UVM_DEC)
+      `uvm_field_int (                         data_bus_width  , UVM_DEFAULT + UVM_DEC)
+      `uvm_field_int (                         strobe_bus_width, UVM_DEFAULT + UVM_DEC)
+      `uvm_field_enum(uvma_axil_drv_idle_enum, drv_idle        , UVM_DEFAULT          )
    `uvm_object_utils_end
    
    
@@ -64,10 +63,10 @@ class uvma_axil_cfg_c extends uvm_object;
       soft cov_model_enabled == 0;
       soft trn_log_enabled   == 1;
       
-      /*soft*/ drv_mode        == UVMA_AXIL_MODE_MSTR;
-      /*soft*/ addr_bus_width  == uvma_axil_default_paddr_width;
-      /*soft*/ data_bus_width  == uvma_axil_default_data_width;
-      /*soft*/ drv_idle        == UVMA_AXIL_DRV_IDLE_ZEROS;
+      soft drv_mode        == UVMA_AXIL_MODE_MSTR;
+      soft addr_bus_width  == uvma_axil_default_addr_width;
+      soft data_bus_width  == uvma_axil_default_data_width;
+      soft drv_idle        == UVMA_AXIL_DRV_IDLE_ZEROS;
    }
    
    constraint rules_cons {

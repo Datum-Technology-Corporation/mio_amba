@@ -22,7 +22,7 @@
 
 `include "uvme_axil_st_base_vseq.sv"
 `include "uvme_axil_st_reads_vseq.sv"
-`include "uvme_axil_st_writes_vseq.sv""
+`include "uvme_axil_st_writes_vseq.sv"
 `include "uvme_axil_st_all_access_vseq.sv"
 
 

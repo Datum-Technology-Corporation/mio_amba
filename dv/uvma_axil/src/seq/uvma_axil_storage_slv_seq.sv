@@ -24,13 +24,14 @@
  * 'slv' sequence that reads back '0 as data, unless the address has been
  * written to.
  */
-class uvma_axil_storage_slv_seq_c extends uvma_axil_base_seq_c;
+class uvma_axil_storage_slv_seq_c extends uvma_axil_slv_base_seq_c;
    
    // Fields
-   int unsigned  mem[int unsigned];
+   bit [(`UVMA_AXIL_DATA_MAX_SIZE-1):0]  mem[int unsigned];
    
    
    `uvm_object_utils_begin(uvma_axil_storage_slv_seq_c)
+      `uvm_field_aa_int_int_unsigned(mem, UVM_DEFAULT)
    `uvm_object_utils_end
    
    
@@ -56,30 +57,40 @@ endfunction : new
 
 task uvma_axil_storage_slv_seq_c::body();
    
-   int unsigned              addr = 0;
-   uvma_axil_slv_seq_item_c  _req;
+   bit [(`UVMA_AXIL_ADDR_MAX_SIZE-1):0]     addr = 0;
+   uvma_axil_slv_seq_item_c                 _req;
    
    forever begin
       get_response(rsp);
       if (rsp.has_error) continue;
       
-      addr = rsp.address[(cfg.addr_bus_width-1):0];
+      for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
+         addr[ii] = rsp.address[ii];
+      end
       case (rsp.access_type)
          UVMA_AXIL_ACCESS_READ: begin
             if (mem.exists(addr)) begin
                `uvm_do_with(_req, {
-                  rdata[(cfg.data_bus_width-1):0] == mem[addr];
+                  foreach (rdata[ii]) {
+                     if (ii < cfg.data_bus_width) {
+                        rdata[ii] == mem[addr][ii];
+                     }
+                  }
                })
             end
             else begin
                `uvm_do_with(_req, {
-                  rdata[(cfg.data_bus_width-1):0] == '0;
+                  foreach (rdata[ii]) {
+                     if (ii < cfg.data_bus_width) {
+                        rdata[ii] == 1'b0;
+                     }
+                  }
                })
             end
          end
          
          UVMA_AXIL_ACCESS_WRITE: begin
-            mem[addr] = rsp.data[(cfg.data_bus_width-1):0];
+            mem[addr] = '0;
             `uvm_do(_req)
          end
          

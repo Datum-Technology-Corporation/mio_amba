@@ -27,16 +27,18 @@
 class uvme_axil_st_cov_model_c extends uvm_component;
    
    // Coverage targets
-   uvme_axil_st_cfg_c    cfg;
-   uvme_axil_st_cntxt_c  cntxt;
-   uvma_axil_seq_item_c  mstr_seq_item;
-   uvma_axil_mon_trn_c   mstr_mon_trn;
-   uvma_axil_mon_trn_c   slv_mon_trn;
+   uvme_axil_st_cfg_c         cfg;
+   uvme_axil_st_cntxt_c       cntxt;
+   uvma_axil_mstr_seq_item_c  mstr_seq_item;
+   uvma_axil_slv_seq_item_c   slv_seq_item;
+   uvma_axil_mon_trn_c        mstr_mon_trn;
+   uvma_axil_mon_trn_c        slv_mon_trn;
    
    // TLM
    uvm_tlm_analysis_fifo#(uvma_axil_mstr_seq_item_c)  mstr_seq_item_fifo;
    uvm_tlm_analysis_fifo#(uvma_axil_slv_seq_item_c )  slv_seq_item_fifo ;
-   uvm_tlm_analysis_fifo#(uvma_axil_mon_trn_c      )  mon_trn_fifo      ;
+   uvm_tlm_analysis_fifo#(uvma_axil_mon_trn_c      )  mstr_mon_trn_fifo ;
+   uvm_tlm_analysis_fifo#(uvma_axil_mon_trn_c      )  slv_mon_trn_fifo  ;
    
    
    `uvm_component_utils_begin(uvme_axil_st_cov_model_c)
@@ -69,11 +71,17 @@ class uvme_axil_st_cov_model_c extends uvm_component;
       //          xyz_cpt : coverpoint slv_seq_item.xyz;
    endgroup : axil_st_slv_seq_item_cg
    
-   covergroup axil_st_mon_trn_cg;
-      // TODO Implement axil_st_mon_trn_cg
+   covergroup axil_st_mstr_mon_trn_cg;
+      // TODO Implement axil_st_mstr_mon_trn_cg
       //      Ex: abc_cpt : coverpoint mon_trn.abc;
       //          xyz_cpt : coverpoint mon_trn.xyz;
-   endgroup : axil_st_mon_trn_cg
+   endgroup : axil_st_mstr_mon_trn_cg
+   
+   covergroup axil_st_slv_mon_trn_cg;
+      // TODO Implement axil_st_slv_mon_trn_cg
+      //      Ex: abc_cpt : coverpoint mon_trn.abc;
+      //          xyz_cpt : coverpoint mon_trn.xyz;
+   endgroup : axil_st_slv_mon_trn_cg
    
    
    /**
@@ -85,11 +93,6 @@ class uvme_axil_st_cov_model_c extends uvm_component;
     * Ensures cfg & cntxt handles are not null.
     */
    extern virtual function void build_phase(uvm_phase phase);
-   
-   /**
-    * TODO Describe uvme_axil_st_cov_model_c::connect_phase()
-    */
-   extern virtual function void connect_phase(uvm_phase phase);
    
    /**
     * Describe uvme_axil_st_cov_model_c::run_phase()
@@ -117,9 +120,14 @@ class uvme_axil_st_cov_model_c extends uvm_component;
    extern function void sample_slv_seq_item();
    
    /**
-    * TODO Describe uvme_axil_st_cov_model_c::sample_mon_trn()
+    * TODO Describe uvme_axil_st_cov_model_c::sample_mstr_mon_trn()
     */
-   extern function void sample_mon_trn();
+   extern function void sample_mstr_mon_trn();
+   
+   /**
+    * TODO Describe uvme_axil_st_cov_model_c::sample_slv_mon_trn()
+    */
+   extern function void sample_slv_mon_trn();
    
 endclass : uvme_axil_st_cov_model_c
 
@@ -148,7 +156,8 @@ function void uvme_axil_st_cov_model_c::build_phase(uvm_phase phase);
    // Build TLM objects
    mstr_seq_item_fifo = new("mstr_seq_item_fifo", this);
    slv_seq_item_fifo  = new("slv_seq_item_fifo" , this);
-   mon_trn_fifo       = new("mon_trn_fifo"      , this);
+   mstr_mon_trn_fifo  = new("mstr_mon_trn_fifo" , this);
+   slv_mon_trn_fifo   = new("slv_mon_trn_fifo"  , this);
    
 endfunction : build_phase
 
@@ -182,10 +191,16 @@ task uvme_axil_st_cov_model_c::run_phase(uvm_phase phase);
        sample_slv_seq_item();
     end
     
-    // monitored transaction coverage
+    // 'mstr' monitored transaction coverage
     forever begin
-       mon_trn_fifo.get(mon_trn);
-       sample_mon_trn();
+       mstr_mon_trn_fifo.get(mstr_mon_trn);
+       sample_mstr_mon_trn();
+    end
+    
+    // 'slv' monitored transaction coverage
+    forever begin
+       slv_mon_trn_fifo.get(slv_mon_trn);
+       sample_slv_mon_trn();
     end
   join_none
    
@@ -220,11 +235,18 @@ function void uvme_axil_st_cov_model_c::sample_slv_seq_item();
 endfunction : sample_slv_seq_item
 
 
-function void uvme_axil_st_cov_model_c::sample_mon_trn();
+function void uvme_axil_st_cov_model_c::sample_mstr_mon_trn();
    
-   axil_st_mon_trn_cg.sample();
+   axil_st_mstr_mon_trn_cg.sample();
    
-endfunction : sample_mon_trn
+endfunction : sample_mstr_mon_trn
+
+
+function void uvme_axil_st_cov_model_c::sample_slv_mon_trn();
+   
+   axil_st_slv_mon_trn_cg.sample();
+   
+endfunction : sample_slv_mon_trn
 
 
 `endif // __UVME_AXIL_ST_COV_MODEL_SV__

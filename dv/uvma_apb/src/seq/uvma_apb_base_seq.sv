@@ -26,12 +26,12 @@
  */
 class uvma_apb_base_seq_c extends uvm_sequence#(
    .REQ(uvma_apb_base_seq_item_c),
-   .RSP(uvma_apb_base_seq_item_c)
+   .RSP(uvma_apb_mon_trn_c      )
 );
    
    // Agent handles
-   uvma_pb_cfg_c    cfg;
-   uvma_pb_cntxt_c  cntxt;
+   uvma_apb_cfg_c    cfg;
+   uvma_apb_cntxt_c  cntxt;
    
    
    `uvm_object_utils(uvma_apb_base_seq_c)
@@ -46,7 +46,7 @@ class uvma_apb_base_seq_c extends uvm_sequence#(
    /**
     * Assigns cfg and cntxt handles from p_sequencer.
     */
-   extern virtual task finish_item(uvm_sequence_item item, int set_priority=-1);
+   extern virtual task pre_start();
    
 endclass : uvma_apb_base_seq_c
 

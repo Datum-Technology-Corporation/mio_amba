@@ -24,13 +24,14 @@
  * 'slv' sequence that reads back '0' as data, unless the address has been
  * written to.
  */
-class uvma_apb_storage_slv_seq_c extends uvma_apb_base_seq_c;
+class uvma_apb_storage_slv_seq_c extends uvma_apb_slv_base_seq_c;
    
    // Fields
-   int unsigned  mem[int unsigned];
+   bit [(`UVMA_APB_PDATA_MAX_SIZE-1):0]  mem[int unsigned];
    
    
    `uvm_object_utils_begin(uvma_apb_storage_slv_seq_c)
+      `uvm_field_aa_int_int_unsigned(mem, UVM_DEFAULT)
    `uvm_object_utils_end
    
    
@@ -67,18 +68,26 @@ task uvma_apb_storage_slv_seq_c::body();
          UVMA_APB_ACCESS_READ: begin
             if (mem.exists(addr)) begin
                `uvm_do_with(_req, {
-                  rdata[(cfg.data_bus_width-1):0] == mem[addr];
+                  foreach (rdata[ii]) {
+                     if (ii < cfg.data_bus_width) {
+                        rdata[ii] == mem[addr][ii];
+                     }
+                  }
                })
             end
             else begin
                `uvm_do_with(_req, {
-                  rdata[(cfg.data_bus_width-1):0] == '0;
+                  foreach (rdata[ii]) {
+                     if (ii < cfg.data_bus_width) {
+                        rdata[ii] == 1'b0;
+                     }
+                  }
                })
             end
          end
          
          UVMA_APB_ACCESS_WRITE: begin
-            mem[addr] = rsp.data[(cfg.data_bus_width-1):0];
+            mem[addr] = '0;
             `uvm_do(_req)
          end
          

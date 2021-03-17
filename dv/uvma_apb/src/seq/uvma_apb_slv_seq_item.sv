@@ -35,7 +35,7 @@ class uvma_apb_slv_seq_item_c extends uvma_apb_base_seq_item_c;
    
    
    
-   `uvm_object_utils_begin(uvma_apb_mon_trn_c)
+   `uvm_object_utils_begin(uvma_apb_slv_seq_item_c)
       `uvm_field_int(rdata , UVM_DEFAULT)
       `uvm_field_int(slverr, UVM_DEFAULT)
       
