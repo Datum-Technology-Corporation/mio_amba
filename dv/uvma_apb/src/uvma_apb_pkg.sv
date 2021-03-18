@@ -42,6 +42,7 @@ package uvma_apb_pkg;
    import uvml_hrtbt_pkg::*;
    import uvml_trn_pkg  ::*;
    import uvml_logs_pkg ::*;
+   import uvml_ral_pkg  ::*;
    
    // Constants / Structs / Enums
    `include "uvma_apb_constants.sv"

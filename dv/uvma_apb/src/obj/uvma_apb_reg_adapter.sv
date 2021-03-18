@@ -49,7 +49,7 @@ class uvma_apb_reg_adapter_c extends uvml_ral_reg_adapter_c;
    /**
     * Must be overriden by user if slv_sel is to be anything other than '1
     */
-   extern virtual function bit [(`UVMA_APB_PSEL_MAX_SIZE -1):0] map_addr_to_slv_sel([(`UVMA_APB_PADDR_MAX_SIZE-1):0] address);
+   extern function bit [(`UVMA_APB_PSEL_MAX_SIZE-1):0] map_addr_to_slv_sel([(`UVMA_APB_PADDR_MAX_SIZE-1):0] address);
    
 endclass : uvma_apb_reg_adapter_c
 
@@ -69,9 +69,9 @@ function uvm_sequence_item uvma_apb_reg_adapter_c::reg2bus(const ref uvm_reg_bus
    apb_trn.address     = rw.addr;
    apb_trn.slv_sel     = map_addr_to_slv_sel(apb_trn.address);
    
-   if (rw.kind == UVM_WRITE)
+   if (rw.kind == UVM_WRITE) begin
       apb_trn.wdata = rw.data;
-   endcase
+   end
    
    return apb_trn;
    
@@ -86,14 +86,14 @@ function void uvma_apb_reg_adapter_c::bus2reg(uvm_sequence_item bus_item, ref uv
       `uvm_fatal("APB", $sformatf("Could not cast bus_item (%s) into apb_trn (%s)", $typename(bus_item), $typename(apb_trn)))
    end
    
-   rw.kind = (apb_trn.access == UVMA_APB_ACCESS_READ) ? UVM_READ : UVM_WRITE;
+   rw.kind = (apb_trn.access_type == UVMA_APB_ACCESS_READ) ? UVM_READ : UVM_WRITE;
    rw.addr = apb_trn.address;
    
-   case (apb_trn.access)
+   case (apb_trn.access_type)
       UVMA_APB_ACCESS_READ : rw.data = apb_trn.rdata;
       UVMA_APB_ACCESS_WRITE: rw.data = apb_trn.wdata;
       
-      default: `uvm_fatal("APB_MON", $sformatf("Invalid access: %0d", apb_trn.access))
+      default: `uvm_fatal("APB_MON", $sformatf("Invalid access_type: %0d", apb_trn.access_type))
    endcase
    
    if (apb_trn.has_error) begin
@@ -106,7 +106,7 @@ function void uvma_apb_reg_adapter_c::bus2reg(uvm_sequence_item bus_item, ref uv
 endfunction : bus2reg
 
 
-function bit [(`UVMA_APB_PSEL_MAX_SIZE -1):0] map_addr_to_slv_sel([(`UVMA_APB_PADDR_MAX_SIZE-1):0] address);
+function bit [(`UVMA_APB_PSEL_MAX_SIZE-1):0] uvma_apb_reg_adapter_c::map_addr_to_slv_sel([(`UVMA_APB_PADDR_MAX_SIZE-1):0] address);
    
    // Default behavior
    return 1'b1;

@@ -25,8 +25,8 @@
  */
 class uvme_apb_st_reads_vseq_c extends uvme_apb_st_base_vseq_c;
    
-   rand uvma_apb_mock_slv_seq_c  slv_seq;
-   rand int unsigned             num_reads;
+   rand uvma_apb_storage_slv_seq_c  slv_seq;
+   rand int unsigned                num_reads;
    
    
    `uvm_object_utils_begin(uvme_apb_st_reads_vseq_c)
@@ -63,6 +63,7 @@ endfunction : new
 task uvme_apb_st_reads_vseq_c::body();
    
    uvma_apb_mstr_seq_item_c  _req;
+   int unsigned              slv_idx;
    
    fork
       begin
@@ -71,9 +72,10 @@ task uvme_apb_st_reads_vseq_c::body();
       
       begin
          repeat (num_reads) begin
+            slv_idx = $urandom_range(0, (cfg.mstr_cfg.mon_slv_list.size()-1));
             `uvm_do_on_with(_req, p_sequencer.mstr_sequencer, {
                access_type == UVMA_APB_ACCESS_READ;
-               slv_sel     == inside {cfg.mon_slv_list};
+               slv_sel     == cfg.mstr_cfg.mon_slv_list[slv_idx];
             })
          end
       end

@@ -44,7 +44,7 @@ class uvma_apb_seq_item_logger_c extends uvml_logs_seq_item_logger_c#(
    /**
     * Writes contents of t to disk.
     */
-   virtual function void write(uvma_apb_seq_item_c t);
+   virtual function void write(uvma_apb_base_seq_item_c t);
       
       // TODO Implement uvma_apb_seq_item_logger_c::write()
       // Ex: fwrite($sformatf(" %t | %08h | %02b | %04d | %02h |", $realtime(), t.a, t.b, t.c, t.d));
@@ -87,7 +87,7 @@ class uvma_apb_seq_item_logger_json_c extends uvma_apb_seq_item_logger_c;
    /**
     * Writes contents of t to disk.
     */
-   virtual function void write(uvma_apb_seq_item_c t);
+   virtual function void write(uvma_apb_base_seq_item_c t);
       
       // TODO Implement uvma_apb_seq_item_logger_json_c::write()
       // Ex: fwrite({"{",

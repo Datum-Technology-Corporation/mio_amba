@@ -27,7 +27,7 @@
 class uvma_apb_storage_slv_seq_c extends uvma_apb_slv_base_seq_c;
    
    // Fields
-   bit [(`UVMA_APB_PDATA_MAX_SIZE-1):0]  mem[int unsigned];
+   bit [(`UVMA_APB_DATA_MAX_SIZE-1):0]  mem[int unsigned];
    
    
    `uvm_object_utils_begin(uvma_apb_storage_slv_seq_c)
@@ -57,13 +57,15 @@ endfunction : new
 
 task uvma_apb_storage_slv_seq_c::body();
    
-   int unsigned             addr = 0;
-   uvma_apb_slv_seq_item_c  _req;
+   bit [(`UVMA_APB_PADDR_MAX_SIZE-1):0]  addr = 0;
+   uvma_apb_slv_seq_item_c               _req;
    
    forever begin
       get_response(rsp);
       
-      addr = rsp.address[(cfg.addr_bus_width-1):0];
+      for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
+         addr[ii] = rsp.address[ii];
+      end
       case (rsp.access_type)
          UVMA_APB_ACCESS_READ: begin
             if (mem.exists(addr)) begin

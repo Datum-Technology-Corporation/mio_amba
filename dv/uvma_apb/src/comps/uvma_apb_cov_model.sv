@@ -145,8 +145,7 @@ function void uvma_apb_cov_model_c::build_phase(uvm_phase phase);
       `uvm_fatal("CNTXT", "Context handle is null")
    end
    
-   mstr_mon_trn_fifo  = new("mstr_mon_trn_fifo" , this);
-   slv_mon_trn_fifo   = new("slv_mon_trn_fifo"  , this);
+   mon_trn_fifo       = new("mon_trn_fifo"      , this);
    mstr_seq_item_fifo = new("mstr_seq_item_fifo", this);
    slv_seq_item_fifo  = new("slv_seq_item_fifo" , this);
    

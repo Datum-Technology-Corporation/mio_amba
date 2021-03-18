@@ -63,7 +63,7 @@ package uvme_apb_st_pkg;
    `include "uvme_apb_st_env.sv"
    
    // Virtual sequences
-   `include "uvme_apb_st_vseq_lib.sv"
+   `include "uvme_apb_st_seq_lib.sv"
    
 endpackage : uvme_apb_st_pkg
 

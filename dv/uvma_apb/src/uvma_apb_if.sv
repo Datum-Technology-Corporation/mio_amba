@@ -74,14 +74,14 @@ interface uvma_apb_if (
     * Used by uvma_apb_drv_c.
     */
    clocking drv_mstr_cb @(posedge clk);
-      output  pready ,
-              prdata ,
-              pslverr;
-      input   paddr  ,
+      output  paddr  ,
               psel   ,
               penable,
               pwrite ,
               pwdata ;
+      input   pready ,
+              prdata ,
+              pslverr;
    endclocking : drv_mstr_cb
    
    /**

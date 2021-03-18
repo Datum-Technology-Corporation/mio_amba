@@ -16,45 +16,45 @@
 // 
 
 
-`ifndef __UVME_APB_ST_VSEQ_LIB_SV__
-`define __UVME_APB_ST_VSEQ_LIB_SV__
+`ifndef __UVME_APB_ST_SEQ_LIB_SV__
+`define __UVME_APB_ST_SEQ_LIB_SV__
 
 
 `include "uvme_apb_st_base_vseq.sv"
 `include "uvme_apb_st_reads_vseq.sv"
-`include "uvme_apb_st_writes_vseq.sv""
+`include "uvme_apb_st_writes_vseq.sv"
 `include "uvme_apb_st_all_access_vseq.sv"
 
 
 /**
- * Virtual sequence library for Advanced Peripheral Bus environment.
+ * Sequence library for Advanced Peripheral Bus environment.
  */
-class uvme_apb_st_vseq_lib_c extends uvm_sequence_library#(
+class uvme_apb_st_seq_lib_c extends uvm_sequence_library#(
    .REQ(uvm_sequence_item),
    .RSP(uvm_sequence_item)
 );
    
-   `uvm_object_utils          (uvme_apb_st_vseq_lib_c)
-   `uvm_sequence_library_utils(uvme_apb_st_vseq_lib_c)
+   `uvm_object_utils          (uvme_apb_st_seq_lib_c)
+   `uvm_sequence_library_utils(uvme_apb_st_seq_lib_c)
    
    
    /**
     * Initializes sequence library.
     */
-   extern function new(string name="uvme_apb_st_vseq_lib");
+   extern function new(string name="uvme_apb_st_seq_lib");
    
-endclass : uvme_apb_st_vseq_lib_c
+endclass : uvme_apb_st_seq_lib_c
 
 
-function uvme_apb_st_vseq_lib_c::new(string name="uvme_apb_st_vseq_lib");
+function uvme_apb_st_seq_lib_c::new(string name="uvme_apb_st_seq_lib");
    
    super.new(name);
    init_sequence_library();
    
-   // TODO Add sequences to uvme_apb_st_vseq_lib_c
+   // TODO Add sequences to uvme_apb_st_seq_lib_c
    //      Ex: add_sequence(uvme_apb_st_abc_vseq_c::get_type());
    
 endfunction : new
 
 
-`endif // __UVME_APB_ST_VSEQ_LIB_SV__
+`endif // __UVME_APB_ST_SEQ_LIB_SV__

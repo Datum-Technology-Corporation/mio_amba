@@ -65,16 +65,23 @@ class uvma_apb_cfg_c extends uvm_object;
       soft cov_model_enabled == 0;
       soft trn_log_enabled   == 1;
       
-      /*soft*/ drv_mode        == UVMA_APB_MODE_MSTR;
-      /*soft*/ addr_bus_width  == uvma_apb_default_paddr_width;
-      /*soft*/ data_bus_width  == uvma_apb_default_data_width ;
-      /*soft*/ sel_width       == uvma_apb_default_psel_width ;
-      /*soft*/ drv_idle        == UVMA_APB_DRV_IDLE_ZEROS;
-      /*soft*/ mon_slv_list[0] == 1;
+      soft drv_mode        == UVMA_APB_MODE_MSTR;
+      soft addr_bus_width  == uvma_apb_default_paddr_width;
+      soft data_bus_width  == uvma_apb_default_data_width ;
+      soft sel_width       == uvma_apb_default_psel_width ;
+      soft drv_idle        == UVMA_APB_DRV_IDLE_ZEROS;
+      soft mon_slv_list[0] == 1;
    }
    
    constraint limits_cons {
-      unique {mon_slv_list};
+      //unique {mon_slv_list};
+      foreach (mon_slv_list[ii]) {
+         foreach (mon_slv_list[jj]) {
+            if (ii != jj) {
+               mon_slv_list[ii] != mon_slv_list[jj];
+            }
+         }
+      }
    }
    
    

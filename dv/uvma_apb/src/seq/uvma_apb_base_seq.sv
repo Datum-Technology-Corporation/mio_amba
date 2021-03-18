@@ -21,8 +21,9 @@
 
 
 /**
- * Abstract object from which all other AMBA Advanced Peripheral Bus agent sequences must extend.
- * Subclasses must be run on AMBA Advanced Peripheral Bus sequencer (uvma_apb_sqr_c) instance.
+ * Abstract object from which all other AMBA Advanced Peripheral Bus agent
+ * sequences must extend. Subclasses must be run on AMBA Advanced Peripheral Bus
+ * sequencer (uvma_apb_sqr_c) instance.
  */
 class uvma_apb_base_seq_c extends uvm_sequence#(
    .REQ(uvma_apb_base_seq_item_c),
@@ -58,7 +59,7 @@ function uvma_apb_base_seq_c::new(string name="uvma_apb_base_seq");
 endfunction : new
 
 
-task uvma_axis_base_seq_c::pre_start();
+task uvma_apb_base_seq_c::pre_start();
    
    cfg   = p_sequencer.cfg;
    cntxt = p_sequencer.cntxt;

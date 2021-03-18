@@ -99,7 +99,7 @@ class uvma_apb_drv_c extends uvm_driver#(
    /**
     * TODO Describe uvma_apb_drv_c::process_mstr_rsp()
     */
-   extern task process_mstr_resp(uvma_apb_slv_seq_item_c req, uvma_apb_mon_trn_c rsp);
+   extern task process_mstr_rsp(uvma_apb_mstr_seq_item_c req, uvma_apb_mon_trn_c rsp);
    
    /**
     * Drives the virtual interface's (cntxt.vif) signals using req's contents.
@@ -210,8 +210,8 @@ task uvma_apb_drv_c::drv_post_reset(uvm_phase phase);
    
    uvma_apb_mstr_seq_item_c  mstr_req;
    uvma_apb_slv_seq_item_c   slv_req;
-   uvma_apb_mstr_mon_trn_c   mstr_rsp;
-   uvma_apb_slv_mon_trn_c    slv_rsp;
+   uvma_apb_mon_trn_c        mstr_rsp;
+   uvma_apb_mon_trn_c        slv_rsp;
    
    case (cfg.drv_mode)
       UVMA_APB_MODE_MSTR: begin
@@ -260,7 +260,7 @@ task uvma_apb_drv_c::get_next_req(ref uvma_apb_base_seq_item_c req);
    `uvml_hrtbt()
    
    // Copy cfg fields
-   req.mode           = cfg.mode;
+   req.mode           = cfg.drv_mode;
    req.addr_bus_width = cfg.addr_bus_width;
    req.data_bus_width = cfg.data_bus_width;
    req.sel_width      = cfg.sel_width;
@@ -289,7 +289,7 @@ task uvma_apb_drv_c::drv_slv_req(uvma_apb_slv_seq_item_c req);
    
    // Latency cycles
    @(cntxt.vif.drv_slv_cb);
-   repeat (slv_req.latency) begin
+   repeat (req.latency) begin
       @(cntxt.vif.drv_slv_cb);
    end
    
@@ -297,16 +297,16 @@ task uvma_apb_drv_c::drv_slv_req(uvma_apb_slv_seq_item_c req);
    cntxt.vif.drv_slv_cb.pready  <= 1'b1;
    cntxt.vif.drv_slv_cb.pslverr <= req.slverr;
    for (int unsigned ii=0; ii<cfg.data_bus_width; ii++) begin
-      cntxt.vif.drv_slv_cb.prdata[ii] <= req.data[ii];
+      cntxt.vif.drv_slv_cb.prdata[ii] <= req.rdata[ii];
    end
    
    // Hold cycles
-   repeat (slv_req.hold_duration) begin
+   repeat (req.hold_duration) begin
       @(cntxt.vif.drv_slv_cb);
    end
    
    // Idle
-   @(cntxt.vif.drv_slv_cb.clk);
+   @(cntxt.vif.drv_slv_cb);
    drv_slv_idle();
    
 endtask : drv_slv_req
@@ -321,33 +321,33 @@ endtask : wait_for_rsp
 
 task uvma_apb_drv_c::process_mstr_rsp(uvma_apb_mstr_seq_item_c req, uvma_apb_mon_trn_c rsp);
    
-   req.rdata     = rsp.rdata ;
-   req.has_error = rsp.slverr;
+   req.rdata     = rsp.data   ;
+   req.has_error = rsp.slv_err;
    
-endtask : process_mstr_resp
+endtask : process_mstr_rsp
 
 
 task uvma_apb_drv_c::drv_mstr_read_req(uvma_apb_mstr_seq_item_c req);
    
    // Setup phase
-   @(cntxt.vif.drv_mstr_cb.clk);
+   @(cntxt.vif.drv_mstr_cb);
    cntxt.vif.drv_mstr_cb.pwrite <= 0;
    for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
-      cntxt.vif.drv_slv_cb.paddr[ii] <= req.address[ii];
+      cntxt.vif.drv_mstr_cb.paddr[ii] <= req.address[ii];
    end
    for (int unsigned ii=0; ii<cfg.sel_width; ii++) begin
-      cntxt.vif.drv_slv_cb.psel[ii] <= req.slv_sel[ii];
+      cntxt.vif.drv_mstr_cb.psel[ii] <= req.slv_sel[ii];
    end
    
    // Access phase
-   @(cntxt.vif.drv_mstr_cb.clk);
+   @(cntxt.vif.drv_mstr_cb);
    cntxt.vif.drv_mstr_cb.penable <= 1;
    do begin
-      @(cntxt.vif.drv_mstr_cb.clk);
+      @(cntxt.vif.drv_mstr_cb);
    end while (cntxt.vif.drv_mstr_cb.pready !== 1'b1);
    
    // Finish up
-   @(cntxt.vif.drv_mstr_cb.clk);
+   @(cntxt.vif.drv_mstr_cb);
    cntxt.vif.drv_mstr_cb.penable <= 0;
    drv_mstr_idle();
    
@@ -357,31 +357,31 @@ endtask : drv_mstr_read_req
 task uvma_apb_drv_c::drv_mstr_write_req(uvma_apb_mstr_seq_item_c req);
    
    // Setup phase
-   @(cntxt.vif.drv_mstr_cb.clk);
+   @(cntxt.vif.drv_mstr_cb);
    cntxt.vif.drv_mstr_cb.pwrite <= 1;
    for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
-      cntxt.vif.drv_slv_cb.paddr[ii] <= req.address[ii];
+      cntxt.vif.drv_mstr_cb.paddr[ii] <= req.address[ii];
    end
    for (int unsigned ii=0; ii<cfg.sel_width; ii++) begin
-      cntxt.vif.drv_slv_cb.psel[ii] <= req.slv_sel[ii];
+      cntxt.vif.drv_mstr_cb.psel[ii] <= req.slv_sel[ii];
    end
    for (int unsigned ii=0; ii<cfg.data_bus_width; ii++) begin
-      cntxt.vif.drv_slv_cb.pwdata[ii] <= req.wdata[ii];
+      cntxt.vif.drv_mstr_cb.pwdata[ii] <= req.wdata[ii];
    end
    
    // Access phase
-   @(cntxt.vif.drv_mstr_cb.clk);
+   @(cntxt.vif.drv_mstr_cb);
    cntxt.vif.drv_mstr_cb.penable <= 1;
    do begin
-      @(cntxt.vif.drv_mstr_cb.clk);
+      @(cntxt.vif.drv_mstr_cb);
    end while (cntxt.vif.drv_mstr_cb.pready !== 1'b1);
    
    // Finish up
-   @(cntxt.vif.drv_mstr_cb.clk);
+   @(cntxt.vif.drv_mstr_cb);
    drv_mstr_idle();
    cntxt.vif.drv_mstr_cb.penable <= 0;
    
-endtask : drv_mstr_read_req
+endtask : drv_mstr_write_req
 
 
 task uvma_apb_drv_c::drv_mstr_idle();

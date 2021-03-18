@@ -41,7 +41,7 @@ from docopt   import docopt
 import os
 import subprocess
 
-dbg = True
+dbg = False
 vivado_path   = "C:/Xilinx/Vivado/2019.2/bin/"
 uvm_home_path = "C:/Users/DavidOuellet-Poulin/Documents/Libraries/1800.2-2017-1.0"
 uvm_dpi_so    = "uvm_dpi"
@@ -111,9 +111,11 @@ def do_paths():
     set_env_var("DV_UVMA_AXIL_SRC_PATH"   , dv_path + "/uvma_axil"    + "/src")
     set_env_var("DV_UVMA_AXIS_SRC_PATH"   , dv_path + "/uvma_axis"    + "/src")
     set_env_var("DV_UVME_PKT_SNF_SRC_PATH", dv_path + "/uvme_pkt_snf" + "/src")
+    set_env_var("DV_UVME_APB_ST_SRC_PATH" , dv_path + "/uvme_apb_st"  + "/src")
     set_env_var("DV_UVME_AXIS_ST_SRC_PATH", dv_path + "/uvme_axis_st" + "/src")
     set_env_var("DV_UVME_AXIL_ST_SRC_PATH", dv_path + "/uvme_axil_st" + "/src")
     set_env_var("DV_UVMT_PKT_SNF_SRC_PATH", dv_path + "/uvmt_pkt_snf" + "/src")
+    set_env_var("DV_UVMT_APB_ST_SRC_PATH" , dv_path + "/uvmt_apb_st"  + "/src")
     set_env_var("DV_UVMT_AXIS_ST_SRC_PATH", dv_path + "/uvmt_axis_st" + "/src")
     set_env_var("DV_UVMT_AXIL_ST_SRC_PATH", dv_path + "/uvmt_axil_st" + "/src")
 
