@@ -25,8 +25,8 @@
  * monitor (uvma_axis_mon_c) and driver (uvma_axis_drv_c).
  */
 interface uvma_axis_if (
-   input  clk    ,
-   input  reset_n
+   input logic clk    ,
+   input logic reset_n
 );
    
    // Slave-out signals

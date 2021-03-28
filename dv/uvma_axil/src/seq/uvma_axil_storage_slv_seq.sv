@@ -70,13 +70,26 @@ task uvma_axil_storage_slv_seq_c::body();
       case (rsp.access_type)
          UVMA_AXIL_ACCESS_READ: begin
             if (mem.exists(addr)) begin
-               `uvm_do_with(_req, {
-                  foreach (rdata[ii]) {
-                     if (ii < cfg.data_bus_width) {
-                        rdata[ii] == mem[addr][ii];
-                     }
-                  }
-               })
+               // The following code is currently incompatible with xsim (2020.2)
+               // Temporary replacement below
+               //`uvm_do_with(_req, {
+               //   foreach (rdata[ii]) {
+               //      if (ii < cfg.data_bus_width) {
+               //         rdata[ii] == mem[addr][ii];
+               //      }
+               //   }
+               //})
+               _req = uvma_axil_slv_seq_item_c::type_id::create("_req");
+               if (_req.randomize()) begin
+                  foreach (rdata[ii]) begin
+                     if (ii < cfg.data_bus_width) begin
+                        _req.rdata[ii] = 1'b0;
+                     end
+                  end
+               end
+               else begin
+                  `uvm_fatal("AXIL_SEQ", $sformatf("Failed to randomize _req:\n%s", _req.sprint()))
+               end
             end
             else begin
                `uvm_do_with(_req, {
@@ -90,7 +103,7 @@ task uvma_axil_storage_slv_seq_c::body();
          end
          
          UVMA_AXIL_ACCESS_WRITE: begin
-            mem[addr] = '0;
+            mem[addr] = rsp.data;
             `uvm_do(_req)
          end
          

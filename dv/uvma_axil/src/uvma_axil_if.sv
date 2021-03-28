@@ -25,8 +25,8 @@
  * monitor (uvma_axil_mon_c) and driver (uvma_axil_drv_c).
  */
 interface uvma_axil_if (
-   input  clk    ,
-   input  reset_n
+   input logic clk    ,
+   input logic reset_n
 );
    
    // Write Address Channel Signals

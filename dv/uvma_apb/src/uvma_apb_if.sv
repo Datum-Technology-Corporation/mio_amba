@@ -25,8 +25,8 @@
  * monitor (uvma_apb_mon_c) and driver (uvma_apb_drv_c).
  */
 interface uvma_apb_if (
-   input  clk    ,
-   input  reset_n
+   input logic clk    ,
+   input logic reset_n
 );
    
    // 'mstr' signals

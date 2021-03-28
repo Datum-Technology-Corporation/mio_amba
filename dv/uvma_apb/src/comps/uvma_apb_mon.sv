@@ -31,7 +31,7 @@ class uvma_apb_mon_c extends uvm_monitor;
    uvma_apb_cntxt_c  cntxt;
    
    // TLM
-   uvm_analysis_port#(uvma_apb_mon_trn_c)  ap;
+   uvm_analysis_port#(uvma_apb_mon_trn_c)  ap;.passive_mp
    uvm_analysis_port#(uvma_apb_mon_trn_c)  drv_rsp_ap;
    
    
@@ -204,14 +204,14 @@ endtask : observe_reset
 
 task uvma_apb_mon_c::mon_pre_reset(uvm_phase phase);
    
-   @(cntxt.vif.mon_cb);
+   @(cntxt.vif.passive_mp.mon_cb);
    
 endtask : mon_pre_reset
 
 
 task uvma_apb_mon_c::mon_in_reset(uvm_phase phase);
    
-   @(cntxt.vif.mon_cb);
+   @(cntxt.vif.passive_mp.mon_cb);
    
 endtask : mon_in_reset
 
@@ -257,8 +257,8 @@ task uvma_apb_mon_c::mon_fsm_inactive(uvma_apb_mon_trn_c trn);
    bit                                 is_active = 0;
    
    do begin
-      @(cntxt.vif.mon_cb);
-      psel = cntxt.vif.mon_cb.psel;
+      @(cntxt.vif.passive_mp.mon_cb);
+      psel = cntxt.vif.passive_mp.mon_cb.psel;
       for (int ii=(`UVMA_APB_PSEL_MAX_SIZE-1); ii>=cfg.sel_width; ii--) begin
          psel[ii] = 0;
       end
@@ -288,10 +288,10 @@ task uvma_apb_mon_c::mon_fsm_setup(uvma_apb_mon_trn_c trn);
    end
    
    do begin
-      @(cntxt.vif.mon_cb);
+      @(cntxt.vif.passive_mp.mon_cb);
       sample_trn_from_vif(_trn);
       check_signals_same(trn, _trn);
-      if (cntxt.vif.mon_cb.penable === 1'b1) begin
+      if (cntxt.vif.passive_mp.mon_cb.penable === 1'b1) begin
          is_enabled = 1;
          cntxt.mon_phase = UVMA_APB_PHASE_ACCESS;
       end
@@ -306,7 +306,7 @@ task uvma_apb_mon_c::mon_fsm_access(uvma_apb_mon_trn_c trn);
    bit                 is_finished = 0;
    
    do begin
-      if ((cntxt.vif.mon_cb.penable === 1'b1) && (cntxt.vif.mon_cb.pready === 1'b1)) begin
+      if ((cntxt.vif.passive_mp.mon_cb.penable === 1'b1) && (cntxt.vif.passive_mp.mon_cb.pready === 1'b1)) begin
          is_finished = 1;
          cntxt.mon_phase = UVMA_APB_PHASE_INACTIVE;
          if (trn.access_type == UVMA_APB_ACCESS_READ) begin
@@ -316,13 +316,13 @@ task uvma_apb_mon_c::mon_fsm_access(uvma_apb_mon_trn_c trn);
          end
          trn.has_error = cntxt.vif.pslverr;
       end
-      else if (cntxt.vif.mon_cb.penable === 1'b0) begin
+      else if (cntxt.vif.passive_mp.mon_cb.penable === 1'b0) begin
          trn.has_error = 1;
          `uvm_error("APB_MON", $sformatf("penable deasserted before pready is asserted (transfer aborted):\n%s", trn.sprint()))
          is_finished = 1;
       end
       
-      @(cntxt.vif.mon_cb);
+      @(cntxt.vif.passive_mp.mon_cb);
       sample_trn_from_vif(_trn);
       check_signals_same(trn, _trn);
       trn.latency++;
@@ -369,24 +369,24 @@ task uvma_apb_mon_c::sample_trn_from_vif(uvma_apb_mon_trn_c trn);
    trn = uvma_apb_mon_trn_c::type_id::create("trn");
    trn.timestamp_start = $realtime();
    
-   if (cntxt.vif.pwrite === 1'b1) begin
+   if (cntxt.vif.passive_mp.pwrite === 1'b1) begin
       trn.access_type = UVMA_APB_ACCESS_WRITE;
       for (int unsigned ii=0; ii<cfg.data_bus_width; ii++) begin
-         trn.data[ii] = cntxt.vif.pwdata[ii];
+         trn.data[ii] = cntxt.vif.passive_mp.pwdata[ii];
       end
    end
-   else if (cntxt.vif.pwrite === 1'b0) begin
+   else if (cntxt.vif.passive_mp.pwrite === 1'b0) begin
       trn.access_type = UVMA_APB_ACCESS_READ;
    end
    else begin
-      `uvm_error("APB_MON", $sformatf("Invalid pwrite value: %h", cntxt.vif.pwrite))
+      `uvm_error("APB_MON", $sformatf("Invalid pwrite value: %h", cntxt.vif.passive_mp.pwrite))
    end
    
    for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
-      trn.address[ii] = cntxt.vif.paddr[ii];
+      trn.address[ii] = cntxt.vif.passive_mp.paddr[ii];
    end
    for (int unsigned ii=0; ii<cfg.sel_width; ii++) begin
-      trn.slv_sel[ii] = cntxt.vif.psel[ii];
+      trn.slv_sel[ii] = cntxt.vif.passive_mp.psel[ii];
    end
    
 endtask : sample_trn_from_vif

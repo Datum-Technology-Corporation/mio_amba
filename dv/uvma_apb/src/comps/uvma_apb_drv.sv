@@ -185,8 +185,8 @@ endtask : run_phase
 task uvma_apb_drv_c::drv_pre_reset(uvm_phase phase);
    
    case (cfg.drv_mode)
-      UVMA_APB_MODE_MSTR: @(cntxt.vif.dut_mstr_cb);
-      UVMA_APB_MODE_SLV : @(cntxt.vif.dut_slv_cb );
+      UVMA_APB_MODE_MSTR: @(cntxt.vif.active_mstr_mp.drv_mstr_cb);
+      UVMA_APB_MODE_SLV : @(cntxt.vif.active_slv_mp .drv_slv_cb );
       
       default: `uvm_fatal("APB_DRV", $sformatf("Invalid drv_mode: %0d", cfg.drv_mode))
    endcase
@@ -197,8 +197,8 @@ endtask : drv_pre_reset
 task uvma_apb_drv_c::drv_in_reset(uvm_phase phase);
    
    case (cfg.drv_mode)
-      UVMA_APB_MODE_MSTR: @(cntxt.vif.dut_mstr_cb);
-      UVMA_APB_MODE_SLV : @(cntxt.vif.dut_slv_cb );
+      UVMA_APB_MODE_MSTR: @(cntxt.vif.active_mstr_mp.drv_mstr_cb);
+      UVMA_APB_MODE_SLV : @(cntxt.vif.active_slv_mp .drv_slv_cb );
       
       default: `uvm_fatal("APB_DRV", $sformatf("Invalid drv_mode: %0d", cfg.drv_mode))
    endcase
@@ -288,25 +288,25 @@ endtask : drv_mstr_req
 task uvma_apb_drv_c::drv_slv_req(uvma_apb_slv_seq_item_c req);
    
    // Latency cycles
-   @(cntxt.vif.drv_slv_cb);
+   @(cntxt.vif.active_slv_mp.drv_slv_cb);
    repeat (req.latency) begin
-      @(cntxt.vif.drv_slv_cb);
+      @(cntxt.vif.active_slv_mp.drv_slv_cb);
    end
    
    // Req data
-   cntxt.vif.drv_slv_cb.pready  <= 1'b1;
-   cntxt.vif.drv_slv_cb.pslverr <= req.slverr;
+   cntxt.vif.active_slv_mp.drv_slv_cb.pready  <= 1'b1;
+   cntxt.vif.active_slv_mp.drv_slv_cb.pslverr <= req.slverr;
    for (int unsigned ii=0; ii<cfg.data_bus_width; ii++) begin
-      cntxt.vif.drv_slv_cb.prdata[ii] <= req.rdata[ii];
+      cntxt.vif.active_slv_mp.drv_slv_cb.prdata[ii] <= req.rdata[ii];
    end
    
    // Hold cycles
    repeat (req.hold_duration) begin
-      @(cntxt.vif.drv_slv_cb);
+      @(cntxt.vif.active_slv_mp.drv_slv_cb);
    end
    
    // Idle
-   @(cntxt.vif.drv_slv_cb);
+   @(cntxt.vif.active_slv_mp.drv_slv_cb);
    drv_slv_idle();
    
 endtask : drv_slv_req
@@ -330,25 +330,25 @@ endtask : process_mstr_rsp
 task uvma_apb_drv_c::drv_mstr_read_req(uvma_apb_mstr_seq_item_c req);
    
    // Setup phase
-   @(cntxt.vif.drv_mstr_cb);
-   cntxt.vif.drv_mstr_cb.pwrite <= 0;
+   @(cntxt.vif.active_mstr_mp.drv_mstr_cb);
+   cntxt.vif.active_mstr_mp.drv_mstr_cb.pwrite <= 0;
    for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
-      cntxt.vif.drv_mstr_cb.paddr[ii] <= req.address[ii];
+      cntxt.vif.active_mstr_mp.drv_mstr_cb.paddr[ii] <= req.address[ii];
    end
    for (int unsigned ii=0; ii<cfg.sel_width; ii++) begin
-      cntxt.vif.drv_mstr_cb.psel[ii] <= req.slv_sel[ii];
+      cntxt.vif.active_mstr_mp.drv_mstr_cb.psel[ii] <= req.slv_sel[ii];
    end
    
    // Access phase
-   @(cntxt.vif.drv_mstr_cb);
-   cntxt.vif.drv_mstr_cb.penable <= 1;
+   @(cntxt.vif.active_mstr_mp.drv_mstr_cb);
+   cntxt.vif.active_mstr_mp.drv_mstr_cb.penable <= 1;
    do begin
-      @(cntxt.vif.drv_mstr_cb);
-   end while (cntxt.vif.drv_mstr_cb.pready !== 1'b1);
+      @(cntxt.vif.active_mstr_mp.drv_mstr_cb);
+   end while (cntxt.vif.active_mstr_mp.drv_mstr_cb.pready !== 1'b1);
    
    // Finish up
-   @(cntxt.vif.drv_mstr_cb);
-   cntxt.vif.drv_mstr_cb.penable <= 0;
+   @(cntxt.vif.active_mstr_mp.drv_mstr_cb);
+   cntxt.vif.active_mstr_mp.drv_mstr_cb.penable <= 0;
    drv_mstr_idle();
    
 endtask : drv_mstr_read_req
@@ -357,29 +357,29 @@ endtask : drv_mstr_read_req
 task uvma_apb_drv_c::drv_mstr_write_req(uvma_apb_mstr_seq_item_c req);
    
    // Setup phase
-   @(cntxt.vif.drv_mstr_cb);
-   cntxt.vif.drv_mstr_cb.pwrite <= 1;
+   @(cntxt.vif.active_mstr_mp.drv_mstr_cb);
+   cntxt.vif.active_mstr_mp.drv_mstr_cb.pwrite <= 1;
    for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
-      cntxt.vif.drv_mstr_cb.paddr[ii] <= req.address[ii];
+      cntxt.vif.active_mstr_mp.drv_mstr_cb.paddr[ii] <= req.address[ii];
    end
    for (int unsigned ii=0; ii<cfg.sel_width; ii++) begin
-      cntxt.vif.drv_mstr_cb.psel[ii] <= req.slv_sel[ii];
+      cntxt.vif.active_mstr_mp.drv_mstr_cb.psel[ii] <= req.slv_sel[ii];
    end
    for (int unsigned ii=0; ii<cfg.data_bus_width; ii++) begin
-      cntxt.vif.drv_mstr_cb.pwdata[ii] <= req.wdata[ii];
+      cntxt.vif.active_mstr_mp.drv_mstr_cb.pwdata[ii] <= req.wdata[ii];
    end
    
    // Access phase
-   @(cntxt.vif.drv_mstr_cb);
-   cntxt.vif.drv_mstr_cb.penable <= 1;
+   @(cntxt.vif.active_mstr_mp.drv_mstr_cb);
+   cntxt.vif.active_mstr_mp.drv_mstr_cb.penable <= 1;
    do begin
-      @(cntxt.vif.drv_mstr_cb);
-   end while (cntxt.vif.drv_mstr_cb.pready !== 1'b1);
+      @(cntxt.vif.active_mstr_mp.drv_mstr_cb);
+   end while (cntxt.vif.active_mstr_mp.drv_mstr_cb.pready !== 1'b1);
    
    // Finish up
-   @(cntxt.vif.drv_mstr_cb);
+   @(cntxt.vif.active_mstr_mp.drv_mstr_cb);
    drv_mstr_idle();
-   cntxt.vif.drv_mstr_cb.penable <= 0;
+   cntxt.vif.active_mstr_mp.drv_mstr_cb.penable <= 0;
    
 endtask : drv_mstr_write_req
 
@@ -390,27 +390,27 @@ task uvma_apb_drv_c::drv_mstr_idle();
       UVMA_APB_DRV_IDLE_SAME: ;// Do nothing;
       
       UVMA_APB_DRV_IDLE_ZEROS: begin
-         cntxt.vif.drv_mstr_cb.paddr  <= '0;
-         cntxt.vif.drv_mstr_cb.psel   <= '0;
-         cntxt.vif.drv_mstr_cb.pwdata <= '0;
+         cntxt.vif.active_mstr_mp.drv_mstr_cb.paddr  <= '0;
+         cntxt.vif.active_mstr_mp.drv_mstr_cb.psel   <= '0;
+         cntxt.vif.active_mstr_mp.drv_mstr_cb.pwdata <= '0;
       end
       
       UVMA_APB_DRV_IDLE_RANDOM: begin
-         cntxt.vif.drv_mstr_cb.paddr  <= $urandom();
-         cntxt.vif.drv_mstr_cb.psel   <= $urandom();
-         cntxt.vif.drv_mstr_cb.pwdata <= $urandom();
+         cntxt.vif.active_mstr_mp.drv_mstr_cb.paddr  <= $urandom();
+         cntxt.vif.active_mstr_mp.drv_mstr_cb.psel   <= $urandom();
+         cntxt.vif.active_mstr_mp.drv_mstr_cb.pwdata <= $urandom();
       end
       
       UVMA_APB_DRV_IDLE_X: begin
-         cntxt.vif.drv_mstr_cb.paddr  <= 'X;
-         cntxt.vif.drv_mstr_cb.psel   <= 'X;
-         cntxt.vif.drv_mstr_cb.pwdata <= 'X;
+         cntxt.vif.active_mstr_mp.drv_mstr_cb.paddr  <= 'X;
+         cntxt.vif.active_mstr_mp.drv_mstr_cb.psel   <= 'X;
+         cntxt.vif.active_mstr_mp.drv_mstr_cb.pwdata <= 'X;
       end
       
       UVMA_APB_DRV_IDLE_Z: begin
-         cntxt.vif.drv_mstr_cb.paddr  <= 'Z;
-         cntxt.vif.drv_mstr_cb.psel   <= 'Z;
-         cntxt.vif.drv_mstr_cb.pwdata <= 'Z;
+         cntxt.vif.active_mstr_mp.drv_mstr_cb.paddr  <= 'Z;
+         cntxt.vif.active_mstr_mp.drv_mstr_cb.psel   <= 'Z;
+         cntxt.vif.active_mstr_mp.drv_mstr_cb.pwdata <= 'Z;
       end
       
       default: `uvm_fatal("APB_DRV", $sformatf("Invalid drv_idle: %0d", cfg.drv_idle))
@@ -425,23 +425,23 @@ task uvma_apb_drv_c::drv_slv_idle();
       UVMA_APB_DRV_IDLE_SAME: ;// Do nothing;
       
       UVMA_APB_DRV_IDLE_ZEROS: begin
-         cntxt.vif.drv_slv_cb.prdata  <= '0;
-         cntxt.vif.drv_slv_cb.pslverr <= 0;
+         cntxt.vif.active_slv_mp.drv_slv_cb.prdata  <= '0;
+         cntxt.vif.active_slv_mp.drv_slv_cb.pslverr <= 0;
       end
       
       UVMA_APB_DRV_IDLE_RANDOM: begin
-         cntxt.vif.drv_slv_cb.prdata  <= $urandom();
-         cntxt.vif.drv_slv_cb.pslverr <= $urandom_range(0,1);
+         cntxt.vif.active_slv_mp.drv_slv_cb.prdata  <= $urandom();
+         cntxt.vif.active_slv_mp.drv_slv_cb.pslverr <= $urandom_range(0,1);
       end
       
       UVMA_APB_DRV_IDLE_X: begin
-         cntxt.vif.drv_slv_cb.prdata  <= 'X;
-         cntxt.vif.drv_slv_cb.pslverr <= 'X;
+         cntxt.vif.active_slv_mp.drv_slv_cb.prdata  <= 'X;
+         cntxt.vif.active_slv_mp.drv_slv_cb.pslverr <= 'X;
       end
       
       UVMA_APB_DRV_IDLE_Z: begin
-         cntxt.vif.drv_slv_cb.prdata  <= 'Z;
-         cntxt.vif.drv_slv_cb.pslverr <= 'Z;
+         cntxt.vif.active_slv_mp.drv_slv_cb.prdata  <= 'Z;
+         cntxt.vif.active_slv_mp.drv_slv_cb.pslverr <= 'Z;
       end
       
       default: `uvm_fatal("APB_DRV", $sformatf("Invalid drv_idle: %0d", cfg.drv_idle))

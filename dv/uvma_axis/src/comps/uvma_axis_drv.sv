@@ -140,7 +140,7 @@ task uvma_axis_drv_c::drv_pre_reset(uvm_phase phase);
    
    case (cfg.mode)
       UVMA_AXIS_MODE_MASTER: drv_mstr_idle();
-      UVMA_AXIS_MODE_SLAVE : @(cntxt.vif.drv_slv_cb);
+      UVMA_AXIS_MODE_SLAVE : @(cntxt.vif.active_slave_mp.drv_slv_cb);
       
       default: `uvm_fatal("AXIS_DRV", $sformatf("Invalid cfg.mode: %s", cfg.mode.name()))
    endcase
@@ -152,7 +152,7 @@ task uvma_axis_drv_c::drv_in_reset(uvm_phase phase);
    
    case (cfg.mode)
       UVMA_AXIS_MODE_MASTER: drv_mstr_idle();
-      UVMA_AXIS_MODE_SLAVE : @(cntxt.vif.drv_slv_cb);
+      UVMA_AXIS_MODE_SLAVE : @(cntxt.vif.active_slave_mp.drv_slv_cb);
       
       default: `uvm_fatal("AXIS_DRV", $sformatf("Invalid cfg.mode: %s", cfg.mode.name()))
    endcase
@@ -181,32 +181,32 @@ task uvma_axis_drv_c::drv_mstr_req(ref uvma_axis_cycle_seq_item_c req);
    
    `uvml_hrtbt()
    
-   @(cntxt.vif.drv_master_cb);
+   @(cntxt.vif.active_master_mp.drv_master_cb);
    
    if (req.tvalid) begin
       // Wait for tready
-      if (cntxt.vif.drv_master_cb.tready !== 1) begin
-         while (cntxt.vif.drv_master_cb.tready !== 1) begin
-            @(cntxt.vif.drv_master_cb);
+      if (cntxt.vif.active_master_mp.drv_master_cb.tready !== 1) begin
+         while (cntxt.vif.active_master_mp.drv_master_cb.tready !== 1) begin
+            @(cntxt.vif.active_master_mp.drv_master_cb);
          end
          // Wait one more cycle
-         @(cntxt.vif.drv_master_cb);
+         @(cntxt.vif.active_master_mp.drv_master_cb);
       end
    end
    
    // Drive bus
-   cntxt.vif.drv_master_cb.tvalid <= req.tvalid;
-   cntxt.vif.drv_master_cb.tstrb  <= req.tstrb ;
-   cntxt.vif.drv_master_cb.tkeep  <= req.tkeep ;
-   cntxt.vif.drv_master_cb.tlast  <= req.tlast ;
-   cntxt.vif.drv_master_cb.tid    <= req.tid   ;
-   cntxt.vif.drv_master_cb.tdest  <= req.tdest ;
-   cntxt.vif.drv_master_cb.tuser  <= req.tuser ;
+   cntxt.vif.active_master_mp.drv_master_cb.tvalid <= req.tvalid;
+   cntxt.vif.active_master_mp.drv_master_cb.tstrb  <= req.tstrb ;
+   cntxt.vif.active_master_mp.drv_master_cb.tkeep  <= req.tkeep ;
+   cntxt.vif.active_master_mp.drv_master_cb.tlast  <= req.tlast ;
+   cntxt.vif.active_master_mp.drv_master_cb.tid    <= req.tid   ;
+   cntxt.vif.active_master_mp.drv_master_cb.tdest  <= req.tdest ;
+   cntxt.vif.active_master_mp.drv_master_cb.tuser  <= req.tuser ;
    
    // Drive bus data
    
    for (int unsigned ii=0; ii<cfg.data_bus_width; ii++) begin
-      cntxt.vif.drv_master_cb.tdata[ii] <= req.tdata[ii];
+      cntxt.vif.active_master_mp.drv_master_cb.tdata[ii] <= req.tdata[ii];
    end
    
 endtask : drv_mstr_req
@@ -214,56 +214,56 @@ endtask : drv_mstr_req
 
 task uvma_axis_drv_c::drv_slv_req(ref uvma_axis_cycle_seq_item_c req);
    
-   @(cntxt.vif.drv_slave_cb);
-   cntxt.vif.drv_slave_cb.tready <= req.tready;
+   @(cntxt.vif.active_slave_mp.drv_slave_cb);
+   cntxt.vif.active_slave_mp.drv_slave_cb.tready <= req.tready;
    
 endtask : drv_slv_req
 
 
 task uvma_axis_drv_c::drv_mstr_idle();
    
-   @(cntxt.vif.drv_master_cb);
-   cntxt.vif.drv_master_cb.tvalid <= '0;
+   @(cntxt.vif.active_master_mp.drv_master_cb);
+   cntxt.vif.active_master_mp.drv_master_cb.tvalid <= '0;
    
    case (cfg.drv_idle)
       UVMA_AXIS_DRV_IDLE_ZEROS : begin
-         cntxt.vif.drv_master_cb.tdata  <= '0;
-         cntxt.vif.drv_master_cb.tstrb  <= '0;
-         cntxt.vif.drv_master_cb.tkeep  <= '0;
-         cntxt.vif.drv_master_cb.tlast  <= '0;
-         cntxt.vif.drv_master_cb.tid    <= '0;
-         cntxt.vif.drv_master_cb.tdest  <= '0;
-         cntxt.vif.drv_master_cb.tuser  <= '0;
+         cntxt.vif.active_master_mp.drv_master_cb.tdata  <= '0;
+         cntxt.vif.active_master_mp.drv_master_cb.tstrb  <= '0;
+         cntxt.vif.active_master_mp.drv_master_cb.tkeep  <= '0;
+         cntxt.vif.active_master_mp.drv_master_cb.tlast  <= '0;
+         cntxt.vif.active_master_mp.drv_master_cb.tid    <= '0;
+         cntxt.vif.active_master_mp.drv_master_cb.tdest  <= '0;
+         cntxt.vif.active_master_mp.drv_master_cb.tuser  <= '0;
       end
       
       UVMA_AXIS_DRV_IDLE_RANDOM : begin
-         cntxt.vif.drv_master_cb.tdata  <= {(cfg.data_bus_width/4)*{$urandom()}};
-         cntxt.vif.drv_master_cb.tstrb  <= $urandom();
-         cntxt.vif.drv_master_cb.tkeep  <= $urandom();
-         cntxt.vif.drv_master_cb.tlast  <= $urandom();
-         cntxt.vif.drv_master_cb.tid    <= $urandom();
-         cntxt.vif.drv_master_cb.tdest  <= $urandom();
-         cntxt.vif.drv_master_cb.tuser  <= $urandom();
+         cntxt.vif.active_master_mp.drv_master_cb.tdata  <= {(cfg.data_bus_width/4)*{$urandom()}};
+         cntxt.vif.active_master_mp.drv_master_cb.tstrb  <= $urandom();
+         cntxt.vif.active_master_mp.drv_master_cb.tkeep  <= $urandom();
+         cntxt.vif.active_master_mp.drv_master_cb.tlast  <= $urandom();
+         cntxt.vif.active_master_mp.drv_master_cb.tid    <= $urandom();
+         cntxt.vif.active_master_mp.drv_master_cb.tdest  <= $urandom();
+         cntxt.vif.active_master_mp.drv_master_cb.tuser  <= $urandom();
       end
       
       UVMA_AXIS_DRV_IDLE_X: begin
-         cntxt.vif.drv_master_cb.tdata <= 'X;
-         cntxt.vif.drv_master_cb.tstrb <= 'X;
-         cntxt.vif.drv_master_cb.tkeep <= 'X;
-         cntxt.vif.drv_master_cb.tlast <= 'X;
-         cntxt.vif.drv_master_cb.tid   <= 'X;
-         cntxt.vif.drv_master_cb.tdest <= 'X;
-         cntxt.vif.drv_master_cb.tuser <= 'X;
+         cntxt.vif.active_master_mp.drv_master_cb.tdata <= 'X;
+         cntxt.vif.active_master_mp.drv_master_cb.tstrb <= 'X;
+         cntxt.vif.active_master_mp.drv_master_cb.tkeep <= 'X;
+         cntxt.vif.active_master_mp.drv_master_cb.tlast <= 'X;
+         cntxt.vif.active_master_mp.drv_master_cb.tid   <= 'X;
+         cntxt.vif.active_master_mp.drv_master_cb.tdest <= 'X;
+         cntxt.vif.active_master_mp.drv_master_cb.tuser <= 'X;
       end
       
       UVMA_AXIS_DRV_IDLE_Z: begin
-         cntxt.vif.drv_master_cb.tdata <= 'Z;
-         cntxt.vif.drv_master_cb.tstrb <= 'Z;
-         cntxt.vif.drv_master_cb.tkeep <= 'Z;
-         cntxt.vif.drv_master_cb.tlast <= 'Z;
-         cntxt.vif.drv_master_cb.tid   <= 'Z;
-         cntxt.vif.drv_master_cb.tdest <= 'Z;
-         cntxt.vif.drv_master_cb.tuser <= 'Z;
+         cntxt.vif.active_master_mp.drv_master_cb.tdata <= 'Z;
+         cntxt.vif.active_master_mp.drv_master_cb.tstrb <= 'Z;
+         cntxt.vif.active_master_mp.drv_master_cb.tkeep <= 'Z;
+         cntxt.vif.active_master_mp.drv_master_cb.tlast <= 'Z;
+         cntxt.vif.active_master_mp.drv_master_cb.tid   <= 'Z;
+         cntxt.vif.active_master_mp.drv_master_cb.tdest <= 'Z;
+         cntxt.vif.active_master_mp.drv_master_cb.tuser <= 'Z;
       end
       
       default: `uvm_fatal("AXIS_DRV", $sformatf("Invalid cfg.drv_idle: %s", cfg.drv_idle.name()))

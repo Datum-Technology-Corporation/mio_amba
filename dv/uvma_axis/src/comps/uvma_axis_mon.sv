@@ -162,14 +162,14 @@ endtask : observe_reset
 
 task uvma_axis_mon_c::mon_pre_reset(uvm_phase phase);
    
-   @(cntxt.vif.mon_cb);
+   @(cntxt.vif.passive_mp.mon_cb);
    
 endtask : mon_pre_reset
 
 
 task uvma_axis_mon_c::mon_in_reset(uvm_phase phase);
    
-   @(cntxt.vif.mon_cb);
+   @(cntxt.vif.passive_mp.mon_cb);
    
 endtask : mon_in_reset
 
@@ -191,13 +191,13 @@ task uvma_axis_mon_c::sample_trn(output uvma_axis_cycle_mon_trn_c trn);
    bit  sampled_trn = 0;
    
    do begin
-      @(cntxt.vif.mon_cb);
+      @(cntxt.vif.passive_mp.mon_cb);
       
       if (cntxt.vif.reset_n === 1) begin
          case (cfg.mode)
             // Only sample when a data transfer is starting
             UVMA_AXIS_MODE_MASTER: begin
-               if ((cntxt.vif.mon_cb.tvalid === 1) && (cntxt.vif.mon_cb.tready === 1)) begin
+               if ((cntxt.vif.passive_mp.mon_cb.tvalid === 1) && (cntxt.vif.passive_mp.mon_cb.tready === 1)) begin
                   sample_signals(trn);
                   sampled_trn = 1;
                end
@@ -207,12 +207,12 @@ task uvma_axis_mon_c::sample_trn(output uvma_axis_cycle_mon_trn_c trn);
                // Sample both when tready is asserted/deasserted and when a data
                // transfer begins
                if (
-                  ((cntxt.vif.mon_cb.tvalid === 1) && (cntxt.vif.mon_cb.tready === 1)) ||
-                  (cntxt.vif.mon_cb.tready !== cntxt.ton)
+                  ((cntxt.vif.passive_mp.mon_cb.tvalid === 1) && (cntxt.vif.passive_mp.mon_cb.tready === 1)) ||
+                  (cntxt.vif.passive_mp.mon_cb.tready !== cntxt.ton)
                ) begin
                   sample_signals(trn);
                   sampled_trn = 1;
-                  cntxt.ton = cntxt.vif.mon_cb.tready;
+                  cntxt.ton = cntxt.vif.passive_mp.mon_cb.tready;
                end
             end
             
@@ -235,18 +235,18 @@ task uvma_axis_mon_c::sample_signals(output uvma_axis_cycle_mon_trn_c trn);
    trn.timestamp_end   = $realtime();
    
    // Sample bus signals
-   trn.tready = cntxt.vif.mon_cb.tready;
-   trn.tstrb  = cntxt.vif.mon_cb.tstrb;
-   trn.tkeep  = cntxt.vif.mon_cb.tkeep;
-   trn.tlast  = cntxt.vif.mon_cb.tlast;
-   trn.tid    = cntxt.vif.mon_cb.tid  ;
-   trn.tdest  = cntxt.vif.mon_cb.tdest;
-   trn.tuser  = cntxt.vif.mon_cb.tuser;
+   trn.tready = cntxt.vif.passive_mp.mon_cb.tready;
+   trn.tstrb  = cntxt.vif.passive_mp.mon_cb.tstrb;
+   trn.tkeep  = cntxt.vif.passive_mp.mon_cb.tkeep;
+   trn.tlast  = cntxt.vif.passive_mp.mon_cb.tlast;
+   trn.tid    = cntxt.vif.passive_mp.mon_cb.tid  ;
+   trn.tdest  = cntxt.vif.passive_mp.mon_cb.tdest;
+   trn.tuser  = cntxt.vif.passive_mp.mon_cb.tuser;
    
    // Sample bus data
    trn.tdata = new[cfg.data_bus_width];
    foreach (trn.tdata[ii]) begin
-      trn.tdata[ii] = cntxt.vif.mon_cb.tdata[ii];
+      trn.tdata[ii] = cntxt.vif.passive_mp.mon_cb.tdata[ii];
    end
    
 endtask : sample_signals
