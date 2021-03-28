@@ -81,7 +81,7 @@ task uvma_axil_storage_slv_seq_c::body();
                //})
                _req = uvma_axil_slv_seq_item_c::type_id::create("_req");
                if (_req.randomize()) begin
-                  foreach (rdata[ii]) begin
+                  foreach (_req.rdata[ii]) begin
                      if (ii < cfg.data_bus_width) begin
                         _req.rdata[ii] = 1'b0;
                      end
@@ -93,9 +93,9 @@ task uvma_axil_storage_slv_seq_c::body();
             end
             else begin
                `uvm_do_with(_req, {
-                  foreach (rdata[ii]) {
+                  foreach (_req.rdata[ii]) {
                      if (ii < cfg.data_bus_width) {
-                        rdata[ii] == 1'b0;
+                        _req.rdata[ii] == 1'b0;
                      }
                   }
                })

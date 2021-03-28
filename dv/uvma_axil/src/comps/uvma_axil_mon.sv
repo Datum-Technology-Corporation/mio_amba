@@ -227,14 +227,14 @@ endtask : observe_reset
 
 task uvma_axil_mon_c::mon_pre_reset(uvm_phase phase);
    
-   @(cntxt.vif.passive_mp.mon_cb);
+   @(cntxt.vif./*passive_mp.*/mon_cb);
    
 endtask : mon_pre_reset
 
 
 task uvma_axil_mon_c::mon_in_reset(uvm_phase phase);
    
-   @(cntxt.vif.passive_mp.mon_cb);
+   @(cntxt.vif./*passive_mp.*/mon_cb);
    
 endtask : mon_in_reset
 
@@ -272,25 +272,25 @@ endtask : mon_write_post_reset
 task uvma_axil_mon_c::mon_read(output uvma_axil_mon_trn_c trn);
    
    // Address Channel
-   while (cntxt.vif.passive_mp.mon_cb.arvalid !== 1'b1) begin
-      @(cntxt.vif.passive_mp.mon_cb);
+   while (cntxt.vif./*passive_mp.*/mon_cb.arvalid !== 1'b1) begin
+      @(cntxt.vif./*passive_mp.*/mon_cb);
    end
    sample_read_trn_from_vif(trn);
    if (cfg.enabled && cfg.is_active && (cfg.drv_mode == UVMA_AXIL_MODE_SLV)) begin
       send_drv_trn(trn);
    end
-   while (cntxt.vif.passive_mp.mon_cb.arready !== 1'b1) begin
-      @(cntxt.vif.passive_mp.mon_cb);
+   while (cntxt.vif./*passive_mp.*/mon_cb.arready !== 1'b1) begin
+      @(cntxt.vif./*passive_mp.*/mon_cb);
    end
    
    // Data Channel
-   while ((cntxt.vif.passive_mp.mon_cb.rvalid !== 1'b1) || (cntxt.vif.passive_mp.mon_cb.rready !== 1'b1)) begin
-      @(cntxt.vif.passive_mp.mon_cb);
+   while ((cntxt.vif./*passive_mp.*/mon_cb.rvalid !== 1'b1) || (cntxt.vif./*passive_mp.*/mon_cb.rready !== 1'b1)) begin
+      @(cntxt.vif./*passive_mp.*/mon_cb);
    end
    
    // Capture response
    trn.timestamp_end = $realtime();
-   trn.response = uvma_axil_response_enum'(cntxt.vif.passive_mp.mon_cb.rresp);
+   trn.response = uvma_axil_response_enum'(cntxt.vif./*passive_mp.*/mon_cb.rresp);
    
    
 endtask : mon_read
@@ -302,15 +302,15 @@ task uvma_axil_mon_c::mon_write(output uvma_axil_mon_trn_c trn);
    fork
       // Address Channel
       begin
-         while (cntxt.vif.passive_mp.mon_cb.awvalid !== 1'b1) begin
-            @(cntxt.vif.passive_mp.mon_cb);
+         while (cntxt.vif./*passive_mp.*/mon_cb.awvalid !== 1'b1) begin
+            @(cntxt.vif./*passive_mp.*/mon_cb);
          end
       end
       
       // Data Channel
       begin
-         while (cntxt.vif.passive_mp.mon_cb.wvalid !== 1'b1) begin
-            @(cntxt.vif.passive_mp.mon_cb);
+         while (cntxt.vif./*passive_mp.*/mon_cb.wvalid !== 1'b1) begin
+            @(cntxt.vif./*passive_mp.*/mon_cb);
          end
       end
    join
@@ -325,28 +325,28 @@ task uvma_axil_mon_c::mon_write(output uvma_axil_mon_trn_c trn);
    fork
       // Address Channel
       begin
-         while (cntxt.vif.passive_mp.mon_cb.awready !== 1'b1) begin
-            @(cntxt.vif.passive_mp.mon_cb);
+         while (cntxt.vif./*passive_mp.*/mon_cb.awready !== 1'b1) begin
+            @(cntxt.vif./*passive_mp.*/mon_cb);
          end
       end
       
       // Data Channel
       begin
-         while (cntxt.vif.passive_mp.mon_cb.wready !== 1'b1) begin
-            @(cntxt.vif.passive_mp.mon_cb);
+         while (cntxt.vif./*passive_mp.*/mon_cb.wready !== 1'b1) begin
+            @(cntxt.vif./*passive_mp.*/mon_cb);
          end
       end
    join
    
    // Wait for response
-   while ((cntxt.vif.passive_mp.mon_cb.bvalid !== 1'b1) || (cntxt.vif.passive_mp.mon_cb.bready !== 1'b1)) begin
-      @(cntxt.vif.passive_mp.mon_cb);
+   while ((cntxt.vif./*passive_mp.*/mon_cb.bvalid !== 1'b1) || (cntxt.vif./*passive_mp.*/mon_cb.bready !== 1'b1)) begin
+      @(cntxt.vif./*passive_mp.*/mon_cb);
       trn.latency++;
    end
    
    // Capture response
    trn.timestamp_end = $realtime();
-   trn.response = uvma_axil_response_enum'(cntxt.vif.passive_mp.mon_cb.rresp);
+   trn.response = uvma_axil_response_enum'(cntxt.vif./*passive_mp.*/mon_cb.rresp);
    
 endtask : mon_write
 
@@ -365,7 +365,6 @@ task uvma_axil_mon_c::send_drv_trn(ref uvma_axil_mon_trn_c trn);
 endtask : send_drv_trn
 
 
-
 task uvma_axil_mon_c::check_signals_same(ref uvma_axil_mon_trn_c trn);
    
    // TODO Implement uvma_axil_mon_c::check_signals_same()
@@ -379,10 +378,10 @@ task uvma_axil_mon_c::sample_read_trn_from_vif(output uvma_axil_mon_trn_c trn);
    trn.access_type = UVMA_AXIL_ACCESS_READ;
    
    for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
-      trn.address[ii] = cntxt.vif.passive_mp.mon_cb.araddr[ii];
+      trn.address[ii] = cntxt.vif./*passive_mp.*/mon_cb.araddr[ii];
    end
    for (int unsigned ii=0; ii<cfg.data_bus_width; ii++) begin
-      trn.data[ii] = cntxt.vif.passive_mp.mon_cb.rdata[ii];
+      trn.data[ii] = cntxt.vif./*passive_mp.*/mon_cb.rdata[ii];
    end
    
 endtask : sample_read_trn_from_vif
@@ -394,13 +393,13 @@ task uvma_axil_mon_c::sample_write_trn_from_vif(output uvma_axil_mon_trn_c trn);
    trn.access_type = UVMA_AXIL_ACCESS_WRITE;
    
    for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
-      trn.address[ii] = cntxt.vif.passive_mp.mon_cb.awaddr[ii];
+      trn.address[ii] = cntxt.vif./*passive_mp.*/mon_cb.awaddr[ii];
    end
    for (int unsigned ii=0; ii<cfg.strobe_bus_width; ii++) begin
-      trn.strobe[ii] = cntxt.vif.passive_mp.mon_cb.wstrb[ii];
+      trn.strobe[ii] = cntxt.vif./*passive_mp.*/mon_cb.wstrb[ii];
    end
    for (int unsigned ii=0; ii<cfg.data_bus_width; ii++) begin
-      trn.data[ii] = cntxt.vif.passive_mp.mon_cb.wdata[ii];
+      trn.data[ii] = cntxt.vif./*passive_mp.*/mon_cb.wdata[ii];
    end
    
 endtask : sample_write_trn_from_vif
