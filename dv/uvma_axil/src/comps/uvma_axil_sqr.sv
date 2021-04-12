@@ -33,6 +33,9 @@ class uvma_axil_sqr_c extends uvm_sequencer#(
    uvma_axil_cfg_c    cfg;
    uvma_axil_cntxt_c  cntxt;
    
+   // TLM
+   uvm_tlm_analysis_fifo #(uvma_axil_mon_trn_c)  mon_trn_fifo;
+   
    
    `uvm_component_utils_begin(uvma_axil_sqr_c)
       `uvm_field_object(cfg  , UVM_DEFAULT)
@@ -73,6 +76,8 @@ function void uvma_axil_sqr_c::build_phase(uvm_phase phase);
    if (!cntxt) begin
       `uvm_fatal("CNTXT", "Context handle is null")
    end
+   
+   mon_trn_fifo = new("mon_trn_fifo", this);
    
 endfunction : build_phase
 

@@ -374,6 +374,7 @@ endtask : check_signals_same
 
 task uvma_axil_mon_c::sample_read_trn_from_vif(output uvma_axil_mon_trn_c trn);
    
+   trn = uvma_axil_mon_trn_c::type_id::create("trn");
    trn.timestamp_start = $realtime();
    trn.access_type = UVMA_AXIL_ACCESS_READ;
    
@@ -389,6 +390,7 @@ endtask : sample_read_trn_from_vif
 
 task uvma_axil_mon_c::sample_write_trn_from_vif(output uvma_axil_mon_trn_c trn);
    
+   trn = uvma_axil_mon_trn_c::type_id::create("trn");
    trn.timestamp_start = $realtime();
    trn.access_type = UVMA_AXIL_ACCESS_WRITE;
    

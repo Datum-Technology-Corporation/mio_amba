@@ -84,42 +84,42 @@ class uvma_axil_drv_c extends uvm_driver#(
    /**
     * Drives the interface's (cntxt.vif) signals using req's contents.
     */
-   extern task drv_mstr_req(uvma_axil_mstr_seq_item_c req);
+   extern task drv_mstr_req(ref uvma_axil_mstr_seq_item_c req);
    
    /**
     * Drives the interface's (cntxt.vif) signals using req's contents.
     */
-   extern task drv_slv_req(uvma_axil_slv_seq_item_c req);
+   extern task drv_slv_req(ref uvma_axil_slv_seq_item_c req);
    
    /**
     * Drives the interface's (cntxt.vif) signals using req's contents.
     */
-   extern task drv_slv_read_req(uvma_axil_slv_seq_item_c req);
+   extern task drv_slv_read_req(ref uvma_axil_slv_seq_item_c req);
    
    /**
     * Drives the interface's (cntxt.vif) signals using req's contents.
     */
-   extern task drv_slv_write_req(uvma_axil_slv_seq_item_c req);
+   extern task drv_slv_write_req(ref uvma_axil_slv_seq_item_c req);
    
    /**
     * TODO Describe uvma_axil_drv_c::wait_for_rsp()
     */
-   extern task wait_for_rsp(uvma_axil_mon_trn_c rsp);
+   extern task wait_for_rsp(output uvma_axil_mon_trn_c rsp);
    
    /**
     * TODO Describe uvma_axil_drv_c::process_mstr_rsp()
     */
-   extern task process_mstr_rsp(uvma_axil_mstr_seq_item_c req, uvma_axil_mon_trn_c rsp);
+   extern task process_mstr_rsp(ref uvma_axil_mstr_seq_item_c req, ref uvma_axil_mon_trn_c rsp);
    
    /**
     * Drives the interface's (cntxt.vif) signals using req's contents.
     */
-   extern task drv_mstr_read_req(uvma_axil_mstr_seq_item_c req);
+   extern task drv_mstr_read_req(ref uvma_axil_mstr_seq_item_c req);
    
    /**
     * Drives the interface's (cntxt.vif) signals using req's contents.
     */
-   extern task drv_mstr_write_req(uvma_axil_mstr_seq_item_c req);
+   extern task drv_mstr_write_req(ref uvma_axil_mstr_seq_item_c req);
    
    /**
     * TODO Describe uvma_axil_drv_c::drv_mstr_idle()
@@ -242,18 +242,14 @@ task uvma_axil_drv_c::drv_post_reset(uvm_phase phase);
       end
       
       UVMA_AXIL_MODE_SLV: begin
-         // 1. Wait for the monitor to send us the mstr's "rsp" with an access request
-         wait_for_rsp(mstr_rsp);
-         seq_item_port.put_response(mstr_rsp);
-         
-         // 2. Get next req from sequence to reply to mstr and drive it on the vif
+         // 1. Get next req from sequence to reply to mstr and drive it on the vif
          get_next_item(req);
          if (!$cast(slv_req, req)) begin
             `uvm_fatal("AXIL_DRV", $sformatf("Could not cast 'req' (%s) to 'slv_req' (%s)", $typename(req), $typename(slv_req)))
          end
          drv_slv_req(slv_req);
          
-         // 3. Send out to TLM and tell sequencer we're ready for the next sequence item
+         // 2. Send out to TLM and tell sequencer we're ready for the next sequence item
          slv_ap.write(slv_req);
          seq_item_port.item_done();
       end
@@ -277,7 +273,7 @@ task uvma_axil_drv_c::get_next_item(output uvma_axil_base_seq_item_c req);
 endtask : get_next_item
 
 
-task uvma_axil_drv_c::drv_mstr_req(uvma_axil_mstr_seq_item_c req);
+task uvma_axil_drv_c::drv_mstr_req(ref uvma_axil_mstr_seq_item_c req);
    
    case (req.access_type)
       UVMA_AXIL_ACCESS_READ: begin
@@ -294,7 +290,7 @@ task uvma_axil_drv_c::drv_mstr_req(uvma_axil_mstr_seq_item_c req);
 endtask : drv_mstr_req
 
 
-task uvma_axil_drv_c::drv_mstr_read_req(uvma_axil_mstr_seq_item_c req);
+task uvma_axil_drv_c::drv_mstr_read_req(ref uvma_axil_mstr_seq_item_c req);
    
    // Address and Data phase can happen simultaneously
    fork
@@ -347,7 +343,7 @@ task uvma_axil_drv_c::drv_mstr_read_req(uvma_axil_mstr_seq_item_c req);
 endtask : drv_mstr_read_req
 
 
-task uvma_axil_drv_c::drv_mstr_write_req(uvma_axil_mstr_seq_item_c req);
+task uvma_axil_drv_c::drv_mstr_write_req(ref uvma_axil_mstr_seq_item_c req);
    
    // Address and Data phase can happen simultaneously
    fork
@@ -421,7 +417,7 @@ task uvma_axil_drv_c::drv_mstr_write_req(uvma_axil_mstr_seq_item_c req);
 endtask : drv_mstr_write_req
 
 
-task uvma_axil_drv_c::drv_slv_req(uvma_axil_slv_seq_item_c req);
+task uvma_axil_drv_c::drv_slv_req(ref uvma_axil_slv_seq_item_c req);
    
    case (req.access_type)
       UVMA_AXIL_ACCESS_READ: begin
@@ -438,7 +434,7 @@ task uvma_axil_drv_c::drv_slv_req(uvma_axil_slv_seq_item_c req);
 endtask : drv_slv_req
 
 
-task uvma_axil_drv_c::drv_slv_read_req(uvma_axil_slv_seq_item_c req);
+task uvma_axil_drv_c::drv_slv_read_req(ref uvma_axil_slv_seq_item_c req);
    
    // Latency cycles
    repeat (req.addr_latency) begin
@@ -475,7 +471,7 @@ task uvma_axil_drv_c::drv_slv_read_req(uvma_axil_slv_seq_item_c req);
 endtask : drv_slv_read_req
 
 
-task uvma_axil_drv_c::drv_slv_write_req(uvma_axil_slv_seq_item_c req);
+task uvma_axil_drv_c::drv_slv_write_req(ref uvma_axil_slv_seq_item_c req);
    
    // Address and Data phase can happen simultaneously
    fork
@@ -531,14 +527,14 @@ task uvma_axil_drv_c::drv_slv_write_req(uvma_axil_slv_seq_item_c req);
 endtask : drv_slv_write_req
 
 
-task uvma_axil_drv_c::wait_for_rsp(uvma_axil_mon_trn_c rsp);
+task uvma_axil_drv_c::wait_for_rsp(output uvma_axil_mon_trn_c rsp);
    
    mon_trn_fifo.get(rsp);
    
 endtask : wait_for_rsp
 
 
-task uvma_axil_drv_c::process_mstr_rsp(uvma_axil_mstr_seq_item_c req, uvma_axil_mon_trn_c rsp);
+task uvma_axil_drv_c::process_mstr_rsp(ref uvma_axil_mstr_seq_item_c req, ref uvma_axil_mon_trn_c rsp);
    
    req.rdata     = rsp.data ;
    req.response  = rsp.response;

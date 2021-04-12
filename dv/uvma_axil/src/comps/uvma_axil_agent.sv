@@ -96,7 +96,7 @@ class uvma_axil_agent_c extends uvm_agent;
    /**
     * Connects monitor and driver's TLM port(s).
     */
-   extern function void connect_monitor_and_driver();
+   extern function void connect_rsp_path();
    
    /**
     * Connects agent's TLM ports to driver's and monitor's.
@@ -141,7 +141,7 @@ function void uvma_axil_agent_c::connect_phase(uvm_phase phase);
    
    connect_analysis_ports      ();
    connect_sequencer_and_driver();
-   connect_monitor_and_driver  ();
+   connect_rsp_path            ();
    
    if (cfg.cov_model_enabled) begin
       connect_cov_model();
@@ -220,11 +220,12 @@ function void uvma_axil_agent_c::connect_sequencer_and_driver();
 endfunction : connect_sequencer_and_driver
 
 
-function void uvma_axil_agent_c::connect_monitor_and_driver();
+function void uvma_axil_agent_c::connect_rsp_path();
    
-   monitor.drv_rsp_ap.connect(driver.mon_trn_fifo.analysis_export);
+   monitor.drv_rsp_ap.connect(driver   .mon_trn_fifo.analysis_export);
+   monitor.drv_rsp_ap.connect(sequencer.mon_trn_fifo.analysis_export);
    
-endfunction : connect_monitor_and_driver
+endfunction : connect_rsp_path
 
 
 function void uvma_axil_agent_c::connect_cov_model();

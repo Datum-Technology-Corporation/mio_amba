@@ -157,7 +157,9 @@ def do_sim(snapshot, test_name, seed, args):
     for arg in args:
         act_args = act_args + " -testplusarg \"" + arg + "\""
     
-    os.mkdir(pwd + "/results/" + test_name + "_" + str(seed))
+    tests_results_path = pwd + "/results/" + test_name + "_" + str(seed)
+    if not os.path.exists(tests_results_path):
+        os.mkdir(tests_results_path)
     
     if (dbg):
         print("Call to do_sim(snapshot='" + snapshot + "', test_name='" + test_name + "', seed='" + str(seed) + "', args='" + act_args + "')")

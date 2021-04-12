@@ -41,9 +41,9 @@ class uvma_axil_storage_slv_seq_c extends uvma_axil_slv_base_seq_c;
    extern function new(string name="uvma_axil_storage_slv_seq");
    
    /**
-    * TODO Describe uvma_axil_storage_slv_seq_c::body()
+    * TODO Describe uvma_axil_storage_slv_seq_c::do_response()
     */
-   extern virtual task body();
+   extern virtual task do_response(ref uvma_axil_mon_trn_c mon_req);
    
 endclass : uvma_axil_storage_slv_seq_c
 
@@ -55,63 +55,63 @@ function uvma_axil_storage_slv_seq_c::new(string name="uvma_axil_storage_slv_seq
 endfunction : new
 
 
-task uvma_axil_storage_slv_seq_c::body();
+task uvma_axil_storage_slv_seq_c::do_response(ref uvma_axil_mon_trn_c mon_req);
    
    bit [(`UVMA_AXIL_ADDR_MAX_SIZE-1):0]     addr = 0;
    uvma_axil_slv_seq_item_c                 _req;
    
-   forever begin
-      get_response(rsp);
-      if (rsp.has_error) continue;
-      
-      for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
-         addr[ii] = rsp.address[ii];
-      end
-      case (rsp.access_type)
-         UVMA_AXIL_ACCESS_READ: begin
-            if (mem.exists(addr)) begin
-               // The following code is currently incompatible with xsim (2020.2)
-               // Temporary replacement below
-               //`uvm_do_with(_req, {
-               //   foreach (rdata[ii]) {
-               //      if (ii < cfg.data_bus_width) {
-               //         rdata[ii] == mem[addr][ii];
-               //      }
-               //   }
-               //})
-               _req = uvma_axil_slv_seq_item_c::type_id::create("_req");
-               if (_req.randomize()) begin
-                  foreach (_req.rdata[ii]) begin
-                     if (ii < cfg.data_bus_width) begin
-                        _req.rdata[ii] = 1'b0;
-                     end
-                  end
-               end
-               else begin
-                  `uvm_fatal("AXIL_SEQ", $sformatf("Failed to randomize _req:\n%s", _req.sprint()))
-               end
-            end
-            else begin
-               `uvm_do_with(_req, {
-                  foreach (_req.rdata[ii]) {
-                     if (ii < cfg.data_bus_width) {
-                        _req.rdata[ii] == 1'b0;
-                     }
-                  }
-               })
-            end
-         end
-         
-         UVMA_AXIL_ACCESS_WRITE: begin
-            mem[addr] = rsp.data;
-            `uvm_do(_req)
-         end
-         
-         default: `uvm_fatal("AXIL_STORAGE_SLV_SEQ", $sformatf("Invalid access_type (%0d):\n%s", rsp.access_type, rsp.sprint()))
-      endcase
+   if (mon_req.has_error) begin
+      return;
    end
    
-endtask : body
+   for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
+      addr[ii] = mon_req.address[ii];
+   end
+   case (mon_req.access_type)
+      UVMA_AXIL_ACCESS_READ: begin
+         if (mem.exists(addr)) begin
+            // The following code is currently incompatible with xsim (2020.2)
+            // Temporary replacement below
+            //`uvm_do_with(_req, {
+            //   foreach (rdata[ii]) {
+            //      if (ii < cfg.data_bus_width) {
+            //         rdata[ii] == mem[addr][ii];
+            //      }
+            //   }
+            //})
+            `uvm_create(_req)
+            if (_req.randomize()) begin
+               foreach (_req.rdata[ii]) begin
+                  if (ii < cfg.data_bus_width) begin
+                     _req.rdata[ii] = 1'b0;
+                  end
+               end
+               `uvm_send(_req)
+            end
+            else begin
+               `uvm_fatal("AXIL_SEQ", $sformatf("Failed to randomize _req:\n%s", _req.sprint()))
+            end
+         end
+         else begin
+            `uvm_do_with(_req, {
+               foreach (_req.rdata[ii]) {
+                  if (ii < cfg.data_bus_width) {
+                     _req.rdata[ii] == 1'b0;
+                  }
+               }
+            })
+         end
+      end
+      
+      UVMA_AXIL_ACCESS_WRITE: begin
+         mem[addr] = mon_req.data;
+         `uvm_do(_req)
+      end
+      
+      default: `uvm_fatal("AXIL_STORAGE_SLV_SEQ", $sformatf("Invalid access_type (%0d):\n%s", mon_req.access_type, mon_req.sprint()))
+   endcase
+   
+endtask : do_response
 
 
 `endif // __UVMA_AXIL_STORAGE_SLV_SEQ_SV__

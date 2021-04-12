@@ -50,11 +50,11 @@ class uvmt_axil_st_test_cfg_c extends uvm_object;
    
    
    constraint defaults_cons {
-      soft clk_period         == uvmt_axil_st_default_clk_period        ;
-      soft reset_period       == uvmt_axil_st_default_reset_period      ;
-      soft startup_timeout    == uvmt_axil_st_default_startup_timeout   ;
-      soft heartbeat_period   == uvmt_axil_st_default_heartbeat_period  ;
-      soft simulation_timeout == uvmt_axil_st_default_simulation_timeout;
+      /*soft*/ clk_period         == uvmt_axil_st_default_clk_period        ;
+      /*soft*/ reset_period       == uvmt_axil_st_default_reset_period      ;
+      /*soft*/ startup_timeout    == uvmt_axil_st_default_startup_timeout   ;
+      /*soft*/ heartbeat_period   == uvmt_axil_st_default_heartbeat_period  ;
+      /*soft*/ simulation_timeout == uvmt_axil_st_default_simulation_timeout;
    }
    
    
