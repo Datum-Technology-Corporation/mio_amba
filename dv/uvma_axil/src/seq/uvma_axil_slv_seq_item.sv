@@ -27,11 +27,12 @@
 class uvma_axil_slv_seq_item_c extends uvma_axil_base_seq_item_c;
    
    // Data
-   rand bit [(`UVMA_AXIL_DATA_MAX_SIZE -1):0]  rdata   ;
-   rand uvma_axil_response_enum                response;
+   rand bit [(`UVMA_AXIL_DATA_MAX_SIZE-1):0]  rdata   ;
+   rand uvma_axil_response_enum               response;
    
    // Metadata
-   rand int unsigned  resp_latency ; ///< Measured in clock cycles
+   rand int unsigned    resp_latency ; ///< Measured in clock cycles
+   uvma_axil_mon_trn_c  req_trn      ; ///< Monitored transaction to which this seq_item is responding
    
    
    `uvm_object_utils_begin(uvma_axil_slv_seq_item_c)
@@ -43,16 +44,18 @@ class uvma_axil_slv_seq_item_c extends uvma_axil_base_seq_item_c;
       `uvm_field_int(rsp_latency  , UVM_DEFAULT + UVM_DEC)
       `uvm_field_int(hold_duration, UVM_DEFAULT + UVM_DEC)
       `uvm_field_int(tail_duration, UVM_DEFAULT + UVM_DEC)
+      
+      `uvm_field_object(req_trn, UVM_DEFAULT)
    `uvm_object_utils_end
    
    
    constraint default_cons {
-      soft response      == UVMA_AXIL_RESPONSE_OK;
-      soft addr_latency  == 1;
-      soft data_latency  == 1;
-      soft rsp_latency   == 1;
-      soft hold_duration == 1;
-      soft tail_duration == 1;
+      /*soft*/ response      == UVMA_AXIL_RESPONSE_OK;
+      /*soft*/ addr_latency  == 1;
+      /*soft*/ data_latency  == 1;
+      /*soft*/ rsp_latency   == 1;
+      /*soft*/ hold_duration == 1;
+      /*soft*/ tail_duration == 1;
    }
    
    

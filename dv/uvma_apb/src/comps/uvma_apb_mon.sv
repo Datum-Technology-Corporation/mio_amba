@@ -367,6 +367,7 @@ endtask : check_signals_same
 task uvma_apb_mon_c::sample_trn_from_vif(uvma_apb_mon_trn_c trn);
    
    trn = uvma_apb_mon_trn_c::type_id::create("trn");
+   trn.originator = this.get_full_name();
    trn.timestamp_start = $realtime();
    
    if (cntxt.vif.passive_mp.pwrite === 1'b1) begin

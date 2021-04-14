@@ -32,7 +32,7 @@ class uvmt_axil_st_base_test_c extends uvm_test;
    rand uvmt_axil_st_test_cfg_c  test_cfg ;
    rand uvme_axil_st_cfg_c       env_cfg  ;
    uvme_axil_st_cntxt_c          env_cntxt;
-   uvml_logs_rs_text_c          rs       ;
+   uvml_logs_rs_text_c           rs       ;
    
    // Components
    uvme_axil_st_env_c   env       ;

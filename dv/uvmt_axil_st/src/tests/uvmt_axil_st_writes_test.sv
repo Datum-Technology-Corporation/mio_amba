@@ -40,6 +40,11 @@ class uvmt_axil_st_writes_test_c extends uvmt_axil_st_base_test_c;
     */
    extern virtual task main_phase(uvm_phase phase);
    
+   /**
+    * TODO Describe uvmt_axil_st_writes_test_c::check_phase()
+    */
+   extern virtual function void check_phase(uvm_phase phase);
+   
 endclass : uvmt_axil_st_writes_test_c
 
 
@@ -64,5 +69,15 @@ task uvmt_axil_st_writes_test_c::main_phase(uvm_phase phase);
    
 endtask : main_phase
 
+
+function void uvmt_axil_st_writes_test_c::check_phase(uvm_phase phase);
+   
+   super.check_phase(phase);
+   
+   if (env_cntxt.sb_cntxt.match_count != writes_vseq.num_writes) begin
+      `uvm_error("TEST", $sformatf("Number of scoreboard matches (%0d) does not equal number of writes (%0d)", env_cntxt.sb_cntxt.match_count, writes_vseq.num_writes))
+   end
+   
+endfunction : check_phase
 
 `endif // __UVMT_AXIL_ST_WRITES_TEST_SV__

@@ -145,26 +145,30 @@ def do_cmp(filelist_path, lib_name):
 def do_elab(lib_name, design_unit):
     if (dbg):
         print("Call to do_elab(lib_name='" + lib_name + "', design_unit='" + design_unit + "')")
-    run_xsim_bin("xelab", design_unit + " -relax --O0 -s " + design_unit + " -timescale 1ns/1ps")
+    run_xsim_bin("xelab", design_unit + " --debug all  -relax --O0 -s " + design_unit + " -timescale 1ns/1ps")
 
 
 
 def do_sim(snapshot, test_name, seed, args):
-    args.append("SIM_DIR_RESULTS=" + pwd + "/results")
+    tests_results_path = pwd + "/results/" + test_name + "_" + str(seed)
+    
     args.append("UVM_TESTNAME=" + test_name + "_c")
+    args.append("SIM_DIR_RESULTS=" + tests_results_path.replace("\\", "/") + "")
     
     act_args = ""
     for arg in args:
         act_args = act_args + " -testplusarg \"" + arg + "\""
     
-    tests_results_path = pwd + "/results/" + test_name + "_" + str(seed)
     if not os.path.exists(tests_results_path):
         os.mkdir(tests_results_path)
+    if not os.path.exists(tests_results_path + "/trn_log"):
+        os.mkdir(tests_results_path + "/trn_log")
     
     if (dbg):
         print("Call to do_sim(snapshot='" + snapshot + "', test_name='" + test_name + "', seed='" + str(seed) + "', args='" + act_args + "')")
     
     run_xsim_bin("xsim", snapshot + " " + act_args + " -runall")
+    #run_xsim_bin("xsim", snapshot + " " + act_args + " --gui")
 
 
 

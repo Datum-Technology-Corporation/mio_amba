@@ -230,6 +230,7 @@ task uvma_axil_drv_c::drv_post_reset(uvm_phase phase);
          if (!$cast(mstr_req, req)) begin
             `uvm_fatal("AXIL_DRV", $sformatf("Could not cast 'req' (%s) to 'mstr_req' (%s)", $typename(req), $typename(mstr_req)))
          end
+         `uvm_info("AXIL_DRV", $sformatf("Got mstr_req:\n%s", mstr_req.sprint()), UVM_HIGH)
          drv_mstr_req(mstr_req);
          
          // 2. Wait for the monitor to send us the slv's rsp with the results of the req
@@ -247,9 +248,12 @@ task uvma_axil_drv_c::drv_post_reset(uvm_phase phase);
          if (!$cast(slv_req, req)) begin
             `uvm_fatal("AXIL_DRV", $sformatf("Could not cast 'req' (%s) to 'slv_req' (%s)", $typename(req), $typename(slv_req)))
          end
+         `uvm_info("AXIL_DRV", $sformatf("Got slv_req:\n%s", slv_req.sprint()), UVM_HIGH)
          drv_slv_req(slv_req);
          
          // 2. Send out to TLM and tell sequencer we're ready for the next sequence item
+         wait_for_rsp(slv_rsp);
+         slv_req.req_trn = slv_rsp;
          slv_ap.write(slv_req);
          seq_item_port.item_done();
       end

@@ -32,7 +32,7 @@ class uvma_axil_mon_c extends uvm_monitor;
    
    // TLM
    uvm_analysis_port#(uvma_axil_mon_trn_c)  ap;
-   uvm_analysis_port#(uvma_axil_mon_trn_c)  drv_rsp_ap;
+   uvm_analysis_port#(uvma_axil_mon_trn_c)  sequencer_ap;
    
    
    `uvm_component_utils_begin(uvma_axil_mon_c)
@@ -98,9 +98,9 @@ class uvma_axil_mon_c extends uvm_monitor;
    extern function void process_trn(ref uvma_axil_mon_trn_c trn);
    
    /**
-    * TODO Describe uvma_axil_mon_c::send_drv_trn()
+    * TODO Describe uvma_axil_mon_c::send_trn_to_sequencer()
     */
-   extern task send_drv_trn(ref uvma_axil_mon_trn_c trn);
+   extern task send_trn_to_sequencer(ref uvma_axil_mon_trn_c trn);
    
    /**
     * TODO Describe uvma_axil_mon_c::check_signals_same()
@@ -141,8 +141,8 @@ function void uvma_axil_mon_c::build_phase(uvm_phase phase);
       `uvm_fatal("CNTXT", "Context handle is null")
    end
    
-   ap         = new("ap"        , this);
-   drv_rsp_ap = new("drv_rsp_ap", this);
+   ap           = new("ap"          , this);
+   sequencer_ap = new("sequencer_ap", this);
   
 endfunction : build_phase
 
@@ -244,9 +244,7 @@ task uvma_axil_mon_c::mon_read_post_reset(uvm_phase phase);
    uvma_axil_mon_trn_c  trn;
    
    mon_read(trn);
-   if (cfg.enabled && cfg.is_active && (cfg.drv_mode == UVMA_AXIL_MODE_MSTR)) begin
-      send_drv_trn(trn);
-   end
+   `uvm_info("AXIL_MON", $sformatf("monitored read:\n%s", trn.sprint()), UVM_HIGH)
    process_trn(trn);
    ap.write   (trn);
    `uvml_hrtbt()
@@ -259,9 +257,7 @@ task uvma_axil_mon_c::mon_write_post_reset(uvm_phase phase);
    uvma_axil_mon_trn_c  trn;
    
    mon_write(trn);
-   if (cfg.enabled && cfg.is_active && (cfg.drv_mode == UVMA_AXIL_MODE_MSTR)) begin
-      send_drv_trn(trn);
-   end
+   `uvm_info("AXIL_MON", $sformatf("monitored write:\n%s", trn.sprint()), UVM_HIGH)
    process_trn(trn);
    ap.write   (trn);
    `uvml_hrtbt()
@@ -277,7 +273,7 @@ task uvma_axil_mon_c::mon_read(output uvma_axil_mon_trn_c trn);
    end
    sample_read_trn_from_vif(trn);
    if (cfg.enabled && cfg.is_active && (cfg.drv_mode == UVMA_AXIL_MODE_SLV)) begin
-      send_drv_trn(trn);
+      send_trn_to_sequencer(trn);
    end
    while (cntxt.vif./*passive_mp.*/mon_cb.arready !== 1'b1) begin
       @(cntxt.vif./*passive_mp.*/mon_cb);
@@ -289,9 +285,14 @@ task uvma_axil_mon_c::mon_read(output uvma_axil_mon_trn_c trn);
    end
    
    // Capture response
+   sample_read_trn_from_vif(trn);
    trn.timestamp_end = $realtime();
    trn.response = uvma_axil_response_enum'(cntxt.vif./*passive_mp.*/mon_cb.rresp);
    
+   // Wait for idle
+   while ((cntxt.vif./*passive_mp.*/mon_cb.rvalid === 1'b1) && (cntxt.vif./*passive_mp.*/mon_cb.rready === 1'b1)) begin
+      @(cntxt.vif./*passive_mp.*/mon_cb);
+   end
    
 endtask : mon_read
 
@@ -318,7 +319,7 @@ task uvma_axil_mon_c::mon_write(output uvma_axil_mon_trn_c trn);
    // 'slv' sequence needs "early" trn in order to respond to it (and drive the rest of the exchange)
    sample_write_trn_from_vif(trn);
    if (cfg.enabled && cfg.is_active && (cfg.drv_mode == UVMA_AXIL_MODE_SLV)) begin
-      send_drv_trn(trn);
+      send_trn_to_sequencer(trn);
    end
    
    // Wait until ready is high for both address and data channels
@@ -345,8 +346,14 @@ task uvma_axil_mon_c::mon_write(output uvma_axil_mon_trn_c trn);
    end
    
    // Capture response
+   sample_write_trn_from_vif(trn);
    trn.timestamp_end = $realtime();
    trn.response = uvma_axil_response_enum'(cntxt.vif./*passive_mp.*/mon_cb.rresp);
+   
+   // Wait for idle
+   while ((cntxt.vif./*passive_mp.*/mon_cb.bvalid === 1'b1) && (cntxt.vif./*passive_mp.*/mon_cb.bready === 1'b1)) begin
+      @(cntxt.vif./*passive_mp.*/mon_cb);
+   end
    
 endtask : mon_write
 
@@ -358,11 +365,11 @@ function void uvma_axil_mon_c::process_trn(ref uvma_axil_mon_trn_c trn);
 endfunction : process_trn
 
 
-task uvma_axil_mon_c::send_drv_trn(ref uvma_axil_mon_trn_c trn);
+task uvma_axil_mon_c::send_trn_to_sequencer(ref uvma_axil_mon_trn_c trn);
    
-   drv_rsp_ap.write(trn);
+   sequencer_ap.write(trn);
    
-endtask : send_drv_trn
+endtask : send_trn_to_sequencer
 
 
 task uvma_axil_mon_c::check_signals_same(ref uvma_axil_mon_trn_c trn);
@@ -375,6 +382,7 @@ endtask : check_signals_same
 task uvma_axil_mon_c::sample_read_trn_from_vif(output uvma_axil_mon_trn_c trn);
    
    trn = uvma_axil_mon_trn_c::type_id::create("trn");
+   trn.originator = this.get_full_name();
    trn.timestamp_start = $realtime();
    trn.access_type = UVMA_AXIL_ACCESS_READ;
    
@@ -391,6 +399,7 @@ endtask : sample_read_trn_from_vif
 task uvma_axil_mon_c::sample_write_trn_from_vif(output uvma_axil_mon_trn_c trn);
    
    trn = uvma_axil_mon_trn_c::type_id::create("trn");
+   trn.originator = this.get_full_name();
    trn.timestamp_start = $realtime();
    trn.access_type = UVMA_AXIL_ACCESS_WRITE;
    

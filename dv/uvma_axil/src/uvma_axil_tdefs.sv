@@ -54,7 +54,8 @@ typedef enum bit {
 typedef enum bit [1:0] {
    UVMA_AXIL_RESPONSE_OK     = 2'b00,
    UVMA_AXIL_RESPONSE_SLVERR = 2'b10
-} uvma_axil_response_enum;
+} uvma_axil_response_enum;
+
 
 
 `endif // __UVMA_AXIL_TDEFS_SV__

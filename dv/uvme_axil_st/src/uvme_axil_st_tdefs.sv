@@ -22,7 +22,7 @@
 
 // Scoreboard specialization
 typedef uvml_sb_simplex_c#(
-   .T_TRN(uvma_axil_mon_trn_c)
+   .T_ACT_TRN(uvma_axil_mon_trn_c)
 ) uvme_axil_st_sb_simplex_c;
 
 

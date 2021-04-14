@@ -4,3 +4,6 @@
 /xsim.dir/*.*
 /xsim.dir/*
 /*.jou
+/*.wdb
+/results/*/*
+/results/*/*.*

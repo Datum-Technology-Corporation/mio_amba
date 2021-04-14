@@ -62,9 +62,12 @@ task uvma_axil_slv_base_seq_c::body();
    
    uvma_axil_mon_trn_c  mon_trn;
    
-   // Wait for the monitor to send us the mstr's "req" with an access request
-   p_sequencer.mon_trn_fifo.get(mon_trn);
-   do_response(mon_trn);
+   forever begin
+      // Wait for the monitor to send us the mstr's "req" with an access request
+      p_sequencer.mon_trn_fifo.get(mon_trn);
+      `uvm_info("AXIL_SLV_SEQ", $sformatf("Got mon_trn:\n%s", mon_trn.sprint()), UVM_HIGH)
+      do_response(mon_trn);
+   end
    
 endtask : body
 
@@ -73,7 +76,8 @@ task uvma_axil_slv_base_seq_c::do_response(ref uvma_axil_mon_trn_c mon_req);
    
    `uvm_fatal("AXIL_SLV_SEQ", "Call to pure virtual task")
    
-endtask : do_response
+endtask : do_response
+
 
 
 `endif // __UVMA_AXIL_SLV_BASE_SEQ_SV__

@@ -228,6 +228,7 @@ task uvma_axis_mon_c::sample_signals(output uvma_axis_cycle_mon_trn_c trn);
    
    // Create transaction and fill in metadata
    trn = uvma_axis_cycle_mon_trn_c::type_id::create("trn");
+   trn.originator = this.get_full_name();
    trn.tid_width   = cfg.tid_width     ;
    trn.tdest_width = cfg.tdest_width   ;
    trn.tuser_width = cfg.tuser_width   ;
@@ -273,6 +274,7 @@ function void uvma_axis_mon_c::process_trn(ref uvma_axis_cycle_mon_trn_c trn);
    if (trn.tlast === 1) begin
       // Create transaction and fill in metadata
       data_trn = uvma_axis_mon_trn_c::type_id::create("data_trn");
+      data_trn.originator = this.get_full_name();
       data_trn.timestamp   = $realtime();
       data_trn.tid_width   = cfg.tid_width  ;
       data_trn.tdest_width = cfg.tdest_width;

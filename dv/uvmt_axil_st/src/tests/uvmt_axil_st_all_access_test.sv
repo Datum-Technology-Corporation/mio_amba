@@ -40,6 +40,11 @@ class uvmt_axil_st_all_access_test_c extends uvmt_axil_st_base_test_c;
     */
    extern virtual task main_phase(uvm_phase phase);
    
+   /**
+    * TODO Describe uvmt_axil_st_all_access_test_c::check_phase()
+    */
+   extern virtual function void check_phase(uvm_phase phase);
+   
 endclass : uvmt_axil_st_all_access_test_c
 
 
@@ -63,6 +68,17 @@ task uvmt_axil_st_all_access_test_c::main_phase(uvm_phase phase);
    phase.drop_objection(this);
    
 endtask : main_phase
+
+
+function void uvmt_axil_st_all_access_test_c::check_phase(uvm_phase phase);
+   
+   super.check_phase(phase);
+   
+   if (env_cntxt.sb_cntxt.match_count != all_access_vseq.num_all_access) begin
+      `uvm_error("TEST", $sformatf("Number of scoreboard matches (%0d) does not equal number of accesses (%0d)", env_cntxt.sb_cntxt.match_count, all_access_vseq.num_all_access))
+   end
+   
+endfunction : check_phase
 
 
 `endif // __UVMT_AXIL_ST_ALL_ACCESS_TEST_SV__

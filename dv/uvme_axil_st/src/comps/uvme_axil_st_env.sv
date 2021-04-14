@@ -35,10 +35,11 @@ class uvme_axil_st_env_c extends uvm_env;
    uvma_axil_agent_c  slv_agent ;
    
    // Components
-   uvme_axil_st_cov_model_c   cov_model;
-   uvme_axil_st_prd_c         predictor;
-   uvme_axil_st_sb_simplex_c  sb;
-   uvme_axil_st_vsqr_c        vsequencer;
+   uvme_axil_st_cov_model_c     cov_model;
+   uvme_axil_st_prd_c           predictor;
+   uvme_axil_st_sb_simplex_c    sb;
+   uvme_axil_st_vsqr_c          vsequencer;
+   uvme_axil_st_slv_sb_delay_c  slv_sb_delay;
    
    
    `uvm_component_utils_begin(uvme_axil_st_env_c)
@@ -191,7 +192,7 @@ function void uvme_axil_st_env_c::assign_cfg();
    uvm_config_db#(uvme_axil_st_cfg_c)::set(this, "*"         , "cfg", cfg         );
    uvm_config_db#(uvma_axil_cfg_c   )::set(this, "mstr_agent", "cfg", cfg.mstr_cfg);
    uvm_config_db#(uvma_axil_cfg_c   )::set(this, "slv_agent" , "cfg", cfg.slv_cfg );
-   uvm_config_db#(uvml_sb_cfg_c    )::set(this, "sb"        , "cfg", cfg.sb_cfg  );
+   uvm_config_db#(uvml_sb_cfg_c     )::set(this, "sb"        , "cfg", cfg.sb_cfg  );
    
 endfunction: assign_cfg
 
@@ -201,7 +202,7 @@ function void uvme_axil_st_env_c::assign_cntxt();
    uvm_config_db#(uvme_axil_st_cntxt_c)::set(this, "*"         , "cntxt", cntxt           );
    uvm_config_db#(uvma_axil_cntxt_c   )::set(this, "mstr_agent", "cntxt", cntxt.mstr_cntxt);
    uvm_config_db#(uvma_axil_cntxt_c   )::set(this, "slv_agent" , "cntxt", cntxt.slv_cntxt );
-   uvm_config_db#(uvml_sb_cntxt_c    )::set(this, "sb"        , "cntxt", cntxt.sb_cntxt  );
+   uvm_config_db#(uvml_sb_cntxt_c     )::set(this, "sb"        , "cntxt", cntxt.sb_cntxt  );
    
 endfunction: assign_cntxt
 
@@ -217,8 +218,9 @@ endfunction: create_agents
 function void uvme_axil_st_env_c::create_env_components();
    
    if (cfg.scoreboarding_enabled) begin
-      predictor = uvme_axil_st_prd_c       ::type_id::create("predictor", this);
-      sb        = uvme_axil_st_sb_simplex_c::type_id::create("sb"       , this);
+      predictor    = uvme_axil_st_prd_c         ::type_id::create("predictor"   , this);
+      sb           = uvme_axil_st_sb_simplex_c  ::type_id::create("sb"          , this);
+      slv_sb_delay = uvme_axil_st_slv_sb_delay_c::type_id::create("slv_sb_delay", this);
    end
    
 endfunction: create_env_components
@@ -249,7 +251,8 @@ endfunction: connect_predictor
 function void uvme_axil_st_env_c::connect_scoreboard();
    
    // Connect agent -> scoreboard
-   slv_agent.mon_ap.connect(sb.act_export);
+   slv_agent   .mon_ap.connect(slv_sb_delay.in_export );
+   slv_sb_delay.out_ap.connect(sb          .act_export);
    
    // Connect predictor -> scoreboard
    predictor.out_ap.connect(sb.exp_export);

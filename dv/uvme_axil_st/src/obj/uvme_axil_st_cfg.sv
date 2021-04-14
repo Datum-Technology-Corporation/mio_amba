@@ -37,7 +37,7 @@ class uvme_axil_st_cfg_c extends uvm_object;
    // Objects
    rand uvma_axil_cfg_c  mstr_cfg;
    rand uvma_axil_cfg_c  slv_cfg;
-   rand uvml_sb_cfg_c   sb_cfg;
+   rand uvml_sb_cfg_c    sb_cfg;
    
    
    `uvm_object_utils_begin(uvme_axil_st_cfg_c)
@@ -56,8 +56,8 @@ class uvme_axil_st_cfg_c extends uvm_object;
    constraint defaults_cons {
       soft enabled                == 0;
       soft is_active              == UVM_PASSIVE;
-      soft scoreboarding_enabled  == 1;
-      soft cov_model_enabled      == 0;
+      /*soft */scoreboarding_enabled  == 1;
+      /*soft */cov_model_enabled      == 0;
       soft trn_log_enabled        == 1;
    }
    
@@ -101,6 +101,7 @@ class uvme_axil_st_cfg_c extends uvm_object;
    constraint sb_cfg_cons {
       if (scoreboarding_enabled) {
          /*soft*/ sb_cfg.enabled == 1;
+         sb_cfg.mode == UVML_SB_MODE_IN_ORDER;
       }
       else {
          sb_cfg.enabled == 0;

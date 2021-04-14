@@ -46,8 +46,22 @@ class uvma_axil_mon_trn_logger_c extends uvml_logs_mon_trn_logger_c#(
     */
    virtual function void write(uvma_axil_mon_trn_c t);
       
-      // TODO Implement uvma_axil_mon_trn_logger_c::write()
-      // Ex: fwrite($sformatf(" %t | %08h | %02b | %04d | %02h |", $realtime(), t.a, t.b, t.c, t.d));
+      string access_str = "";
+      string rsp_str    = "";
+      
+      case (t.access_type)
+         UVMA_AXIL_ACCESS_READ : access_str = "R  ";
+         UVMA_AXIL_ACCESS_WRITE: access_str = "  W";
+         default               : access_str = " ? ";
+      endcase
+      
+      case (t.response)
+         UVMA_AXIL_RESPONSE_OK    : rsp_str = " OK ";
+         UVMA_AXIL_RESPONSE_SLVERR: rsp_str = " ERR";
+         default                  : rsp_str = "  ? ";
+      endcase
+      
+      fwrite($sformatf(" %t | %s | %s | %h | %b | %h ", $realtime(), access_str, rsp_str, t.address, t.strobe, t.data));
       
    endfunction : write
    
@@ -56,10 +70,9 @@ class uvma_axil_mon_trn_logger_c extends uvml_logs_mon_trn_logger_c#(
     */
    virtual function void print_header();
       
-      // TODO Implement uvma_axil_mon_trn_logger_c::print_header()
-      // Ex: fwrite("----------------------------------------------");
-      //     fwrite(" TIME | FIELD A | FIELD B | FIELD C | FIELD D ");
-      //     fwrite("----------------------------------------------");
+      fwrite("---------------------------------------------------");
+      fwrite("         TIME       | R/W | RESP | ADDRESS  | STRB | DATA");
+      fwrite("---------------------------------------------------");
       
    endfunction : print_header
    

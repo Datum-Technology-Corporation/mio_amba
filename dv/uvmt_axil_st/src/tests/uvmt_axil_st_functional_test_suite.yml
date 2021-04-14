@@ -50,21 +50,21 @@ parameters:
 sets:
    basic: # This is a 'set'
       reads: # This is a test grouping
-         name: "uvmt_axil_st_reads_test_c"
+         test-name: "reads"
          parameters: null
          regressions:
             - { name: "sanity", type: "rand-seeds", count: 1 }
             - { name: "nightly", type: "rand-seeds", count: 10 }
             - { name: "weekly", type: "rand-seeds", count: 20 }
       writes:
-         name: "uvmt_axil_st_writes_test_c"
+         test-name: "writes"
          parameters: null
          regressions:
             - { name: "sanity", type: "rand-seeds", count: 1 }
             - { name: "nightly", type: "rand-seeds", count: 15 }
             - { name: "weekly", type: "rand-seeds", count: 30 }
       all_access:
-         name: "uvmt_axil_st_all_access_test_c"
+         test-name: "all_access"
          parameters: null
          regressions:
             - { name: "sanity", type: "rand-seeds", count: 1 }
@@ -73,23 +73,17 @@ sets:
    
    performance: # This is another 'set'
       bursts:
-         name: "uvmt_axil_st_all_access_test_c"
+         test-name: "all_access"
          parameters: 
             max-burst: 100
          regressions:
             - { name: "nightly", type: "soak", minutes: 10 }
             - { name: "weekly", type: "soak", minutes: 60 }
       sustained:
-         name: "uvmt_axil_st_all_access_test_c"
+         test-name: "all_access"
          parameters:
             max-burst: 0
          regressions:
             - { name: "nightly", type: "soak", minutes: 10 }
             - { name: "weekly", type: "soak", minutes: 60 }
    
-   bad-seeds: # One last of these wicked 'set's
-      reads:
-         name: "uvmt_axil_st_reads_test_c"
-         parameters: null
-         regressions:
-            - { name: "nightly", type: "set-seeds", seeds: [42,67,99] }

@@ -81,10 +81,10 @@ task uvma_axil_storage_slv_seq_c::do_response(ref uvma_axil_mon_trn_c mon_req);
             //})
             `uvm_create(_req)
             if (_req.randomize()) begin
+               _req.access_type = UVMA_AXIL_ACCESS_READ;
+               _req.response    = UVMA_AXIL_RESPONSE_OK;
                foreach (_req.rdata[ii]) begin
-                  if (ii < cfg.data_bus_width) begin
-                     _req.rdata[ii] = 1'b0;
-                  end
+                  _req.rdata[ii] = 1'b0;
                end
                `uvm_send(_req)
             end
@@ -94,10 +94,10 @@ task uvma_axil_storage_slv_seq_c::do_response(ref uvma_axil_mon_trn_c mon_req);
          end
          else begin
             `uvm_do_with(_req, {
+               _req.access_type == UVMA_AXIL_ACCESS_READ;
+               _req.response    == UVMA_AXIL_RESPONSE_OK;
                foreach (_req.rdata[ii]) {
-                  if (ii < cfg.data_bus_width) {
-                     _req.rdata[ii] == 1'b0;
-                  }
+                  _req.rdata[ii] == 1'b0;
                }
             })
          end
@@ -105,7 +105,10 @@ task uvma_axil_storage_slv_seq_c::do_response(ref uvma_axil_mon_trn_c mon_req);
       
       UVMA_AXIL_ACCESS_WRITE: begin
          mem[addr] = mon_req.data;
-         `uvm_do(_req)
+         `uvm_do_with(_req, {
+            _req.access_type == UVMA_AXIL_ACCESS_WRITE;
+            _req.response    == UVMA_AXIL_RESPONSE_OK;
+         })
       end
       
       default: `uvm_fatal("AXIL_STORAGE_SLV_SEQ", $sformatf("Invalid access_type (%0d):\n%s", mon_req.access_type, mon_req.sprint()))

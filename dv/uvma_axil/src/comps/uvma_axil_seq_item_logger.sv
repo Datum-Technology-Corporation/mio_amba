@@ -46,20 +46,113 @@ class uvma_axil_seq_item_logger_c extends uvml_logs_seq_item_logger_c#(
     */
    virtual function void write(uvma_axil_base_seq_item_c t);
       
-      // TODO Implement uvma_axil_seq_item_logger_c::write()
-      // Ex: fwrite($sformatf(" %t | %08h | %02b | %04d | %02h |", $realtime(), t.a, t.b, t.c, t.d));
+      uvma_axil_mstr_seq_item_c  mstr_t;
+      uvma_axil_slv_seq_item_c   slv_t;
+      
+      case (cfg.drv_mode)
+         UVMA_AXIL_MODE_MSTR: begin
+            if (!$cast(mstr_t, t)) begin
+               `uvm_fatal("AXIL_SEQ_ITEM_LOGGER", $sformatf("Could not cast 't' (%s) to 'mstr_t' (%s)", $typename(t), $typename(mstr_t)))
+            end
+            write_mstr(mstr_t);
+         end
+         
+         UVMA_AXIL_MODE_SLV: begin
+            if (!$cast(slv_t, t)) begin
+               `uvm_fatal("AXIL_SEQ_ITEM_LOGGER", $sformatf("Could not cast 't' (%s) to 'slv_t' (%s)", $typename(t), $typename(slv_t)))
+            end
+            write_slv(slv_t);
+         end
+         
+         default: `uvm_fatal("AXIL_SEQ_ITEM_LOGGER", $sformatf("Invalid drv_mode: %0d", cfg.drv_mode))
+      endcase
       
    endfunction : write
+   
+   /**
+    * Writes contents of mstr t to disk.
+    */
+   virtual function void write_mstr(uvma_axil_mstr_seq_item_c t);
+      
+      string access_str = "";
+      string rsp_str    = "";
+      string strobe_str = "";
+      string data_str   = "";
+      
+      case (t.access_type)
+         UVMA_AXIL_ACCESS_READ : access_str = "R  ";
+         UVMA_AXIL_ACCESS_WRITE: access_str = "  W";
+         default               : access_str = " ? ";
+      endcase
+      
+      case (t.response)
+         UVMA_AXIL_RESPONSE_OK    : rsp_str = " OK ";
+         UVMA_AXIL_RESPONSE_SLVERR: rsp_str = " ERR";
+         default                  : rsp_str = "  ? ";
+      endcase
+      
+      case (t.access_type)
+         UVMA_AXIL_ACCESS_READ: begin
+            strobe_str = "   ";
+            data_str   = $sformatf("%b", t.rdata  );
+         end
+         
+         UVMA_AXIL_ACCESS_WRITE: begin
+            strobe_str = $sformatf("%b", t.wstrobe);
+            data_str   = $sformatf("%h", t.wdata  );
+         end
+      endcase
+      
+      fwrite($sformatf(" %t | %s | %s | %h | %s | %s ", $realtime(), access_str, rsp_str, t.address, strobe_str, data_str));
+      
+   endfunction : write_mstr
+   
+   /**
+    * Writes contents of slv t to disk.
+    */
+   virtual function void write_slv(uvma_axil_slv_seq_item_c t);
+      
+      string access_str = "";
+      string rsp_str    = "";
+      string strobe_str = "";
+      string data_str   = "";
+      
+      case (t.access_type)
+         UVMA_AXIL_ACCESS_READ : access_str = "R  ";
+         UVMA_AXIL_ACCESS_WRITE: access_str = "  W";
+         default               : access_str = " ? ";
+      endcase
+      
+      case (t.response)
+         UVMA_AXIL_RESPONSE_OK    : rsp_str = " OK ";
+         UVMA_AXIL_RESPONSE_SLVERR: rsp_str = " ERR";
+         default                  : rsp_str = "  ? ";
+      endcase
+      
+      case (t.access_type)
+         UVMA_AXIL_ACCESS_READ: begin
+            strobe_str = "   ";
+            data_str   = $sformatf("%b", t.rdata);
+         end
+         
+         UVMA_AXIL_ACCESS_WRITE: begin
+            strobe_str = $sformatf("%b", t.req_trn.strobe);
+            data_str   = $sformatf("%h", t.req_trn.data  );
+         end
+      endcase
+      
+      fwrite($sformatf(" %t | %s | %s | %h | %s | %s ", $realtime(), access_str, rsp_str, t.req_trn.address, strobe_str, data_str));
+      
+   endfunction : write_slv
    
    /**
     * Writes log header to disk.
     */
    virtual function void print_header();
       
-      // TODO Implement uvma_axil_seq_item_logger_c::print_header()
-      // Ex: fwrite("----------------------------------------------");
-      //     fwrite(" TIME | FIELD A | FIELD B | FIELD C | FIELD D ");
-      //     fwrite("----------------------------------------------");
+      fwrite("---------------------------------------------------");
+      fwrite("        TIME        | R/W | RESP | ADDRESS  | STRB | DATA");
+      fwrite("---------------------------------------------------");
       
    endfunction : print_header
    
