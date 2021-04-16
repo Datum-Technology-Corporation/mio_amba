@@ -104,6 +104,7 @@ task uvma_axil_storage_slv_seq_c::do_response(ref uvma_axil_mon_trn_c mon_req);
       end
       
       UVMA_AXIL_ACCESS_WRITE: begin
+         // BUG: need to account for strobe
          mem[addr] = mon_req.data;
          `uvm_do_with(_req, {
             _req.access_type == UVMA_AXIL_ACCESS_WRITE;
