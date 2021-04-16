@@ -104,8 +104,13 @@ task uvma_axil_storage_slv_seq_c::do_response(ref uvma_axil_mon_trn_c mon_req);
       end
       
       UVMA_AXIL_ACCESS_WRITE: begin
-         // BUG: need to account for strobe
-         mem[addr] = mon_req.data;
+         bit [(`UVMA_AXIL_DATA_MAX_SIZE-1):0]  wdata = mem[addr];
+         foreach (mon_req.strobe[ii]) begin
+            if (mon_req.strobe[ii]) begin
+               wdata[ii*8 +: 8] = mon_req.data[ii*8 +: 8];
+            end
+         end
+         mem[addr] = wdata;
          `uvm_do_with(_req, {
             _req.access_type == UVMA_AXIL_ACCESS_WRITE;
             _req.response    == UVMA_AXIL_RESPONSE_OK;
