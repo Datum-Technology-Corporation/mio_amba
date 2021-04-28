@@ -96,7 +96,7 @@ function void uvma_apb_reg_adapter_c::bus2reg(uvm_sequence_item bus_item, ref uv
       default: `uvm_fatal("APB_MON", $sformatf("Invalid access_type: %0d", apb_trn.access_type))
    endcase
    
-   if (apb_trn.has_error) begin
+   if (apb_trn.__has_error) begin
       rw.status = UVM_NOT_OK;
    end
    else begin

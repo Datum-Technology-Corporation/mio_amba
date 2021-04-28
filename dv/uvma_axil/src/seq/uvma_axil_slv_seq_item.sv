@@ -45,11 +45,11 @@ class uvma_axil_slv_seq_item_c extends uvma_axil_base_seq_item_c;
       `uvm_field_int(hold_duration, UVM_DEFAULT + UVM_DEC)
       `uvm_field_int(tail_duration, UVM_DEFAULT + UVM_DEC)
       
-      `uvm_field_object(req_trn, UVM_DEFAULT)
+      `uvm_field_object(req_trn, UVM_DEFAULT + UVM_NOCOMPARE)
    `uvm_object_utils_end
    
    
-   constraint default_cons {
+   constraint defaults_cons {
       /*soft*/ response      == UVMA_AXIL_RESPONSE_OK;
       /*soft*/ addr_latency  == 1;
       /*soft*/ data_latency  == 1;

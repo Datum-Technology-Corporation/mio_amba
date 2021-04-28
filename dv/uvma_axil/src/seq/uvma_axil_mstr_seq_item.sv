@@ -51,7 +51,7 @@ class uvma_axil_mstr_seq_item_c extends uvma_axil_base_seq_item_c;
    `uvm_object_utils_end
    
    
-   constraint default_cons {
+   constraint defaults_cons {
       /*soft*/ response      == UVMA_AXIL_RESPONSE_OK;
       /*soft*/ addr_latency  == 0;
       /*soft*/ data_latency  == 0;
@@ -60,7 +60,7 @@ class uvma_axil_mstr_seq_item_c extends uvma_axil_base_seq_item_c;
       /*soft*/ tail_duration == 1;
       
       foreach (wstrobe[ii]) {
-         wstrobe[ii] == 1'b1;
+         /*soft*/wstrobe[ii] == 1'b1;
       }
    }
    

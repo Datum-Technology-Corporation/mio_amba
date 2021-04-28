@@ -285,10 +285,8 @@ endfunction : randomize_test
 
 function void uvmt_axil_st_base_test_c::cfg_hrtbt_monitor();
    
-   //`uvml_hrtbt_set_cfg(startup_timeout , test_cfg.startup_timeout )
-   //`uvml_hrtbt_set_cfg(heartbeat_period, test_cfg.heartbeat_period)
-   uvml_default_hrtbt.startup_timeout  = test_cfg.startup_timeout ;
-   uvml_default_hrtbt.heartbeat_period = test_cfg.heartbeat_period;
+   `uvml_hrtbt_set_cfg(startup_timeout , test_cfg.startup_timeout )
+   `uvml_hrtbt_set_cfg(heartbeat_period, test_cfg.heartbeat_period)
    
 endfunction : cfg_hrtbt_monitor
 

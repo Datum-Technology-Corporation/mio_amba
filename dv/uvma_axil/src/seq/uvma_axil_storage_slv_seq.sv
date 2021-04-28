@@ -60,7 +60,7 @@ task uvma_axil_storage_slv_seq_c::do_response(ref uvma_axil_mon_trn_c mon_req);
    bit [(`UVMA_AXIL_ADDR_MAX_SIZE-1):0]     addr = 0;
    uvma_axil_slv_seq_item_c                 _req;
    
-   if (mon_req.has_error) begin
+   if (mon_req.__has_error) begin
       return;
    end
    
@@ -84,12 +84,12 @@ task uvma_axil_storage_slv_seq_c::do_response(ref uvma_axil_mon_trn_c mon_req);
                _req.access_type = UVMA_AXIL_ACCESS_READ;
                _req.response    = UVMA_AXIL_RESPONSE_OK;
                foreach (_req.rdata[ii]) begin
-                  _req.rdata[ii] = 1'b0;
+                  _req.rdata[ii] = mem[addr][ii];
                end
                `uvm_send(_req)
             end
             else begin
-               `uvm_fatal("AXIL_SEQ", $sformatf("Failed to randomize _req:\n%s", _req.sprint()))
+               `uvm_fatal("AXIL_SLV_SEQ", $sformatf("Failed to randomize _req:\n%s", _req.sprint()))
             end
          end
          else begin
@@ -117,7 +117,7 @@ task uvma_axil_storage_slv_seq_c::do_response(ref uvma_axil_mon_trn_c mon_req);
          })
       end
       
-      default: `uvm_fatal("AXIL_STORAGE_SLV_SEQ", $sformatf("Invalid access_type (%0d):\n%s", mon_req.access_type, mon_req.sprint()))
+      default: `uvm_fatal("AXIL_SLV_SEQ", $sformatf("Invalid access_type (%0d):\n%s", mon_req.access_type, mon_req.sprint()))
    endcase
    
 endtask : do_response

@@ -286,7 +286,7 @@ task uvma_axil_mon_c::mon_read(output uvma_axil_mon_trn_c trn);
    
    // Capture response
    sample_read_trn_from_vif(trn);
-   trn.timestamp_end = $realtime();
+   trn.__timestamp_end = $realtime();
    trn.response = uvma_axil_response_enum'(cntxt.vif./*passive_mp.*/mon_cb.rresp);
    
    // Wait for idle
@@ -347,7 +347,7 @@ task uvma_axil_mon_c::mon_write(output uvma_axil_mon_trn_c trn);
    
    // Capture response
    sample_write_trn_from_vif(trn);
-   trn.timestamp_end = $realtime();
+   trn.__timestamp_end = $realtime();
    trn.response = uvma_axil_response_enum'(cntxt.vif./*passive_mp.*/mon_cb.rresp);
    
    // Wait for idle
@@ -382,8 +382,8 @@ endtask : check_signals_same
 task uvma_axil_mon_c::sample_read_trn_from_vif(output uvma_axil_mon_trn_c trn);
    
    trn = uvma_axil_mon_trn_c::type_id::create("trn");
-   trn.originator = this.get_full_name();
-   trn.timestamp_start = $realtime();
+   trn.__originator = this.get_full_name();
+   trn.__timestamp_start = $realtime();
    trn.access_type = UVMA_AXIL_ACCESS_READ;
    
    for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin
@@ -399,8 +399,8 @@ endtask : sample_read_trn_from_vif
 task uvma_axil_mon_c::sample_write_trn_from_vif(output uvma_axil_mon_trn_c trn);
    
    trn = uvma_axil_mon_trn_c::type_id::create("trn");
-   trn.originator = this.get_full_name();
-   trn.timestamp_start = $realtime();
+   trn.__originator = this.get_full_name();
+   trn.__timestamp_start = $realtime();
    trn.access_type = UVMA_AXIL_ACCESS_WRITE;
    
    for (int unsigned ii=0; ii<cfg.addr_bus_width; ii++) begin

@@ -64,12 +64,12 @@ class uvma_axil_drv_c extends uvm_driver#(
    /**
     * Called by run_phase() while agent is in pre-reset state.
     */
-   extern task drv_pre_reset(uvm_phase phase);
+   extern virtual task drv_pre_reset(uvm_phase phase);
    
    /**
     * Called by run_phase() while agent is in reset state.
     */
-   extern task drv_in_reset(uvm_phase phase);
+   extern virtual task drv_in_reset(uvm_phase phase);
    
    /**
     * Called by run_phase() while agent is in post-reset state.
@@ -89,17 +89,27 @@ class uvma_axil_drv_c extends uvm_driver#(
    /**
     * Drives the interface's (cntxt.vif) signals using req's contents.
     */
+   extern virtual task drv_mstr_read_req(ref uvma_axil_mstr_seq_item_c req);
+   
+   /**
+    * Drives the interface's (cntxt.vif) signals using req's contents.
+    */
+   extern virtual task drv_mstr_write_req(ref uvma_axil_mstr_seq_item_c req);
+   
+   /**
+    * Drives the interface's (cntxt.vif) signals using req's contents.
+    */
    extern task drv_slv_req(ref uvma_axil_slv_seq_item_c req);
    
    /**
     * Drives the interface's (cntxt.vif) signals using req's contents.
     */
-   extern task drv_slv_read_req(ref uvma_axil_slv_seq_item_c req);
+   extern virtual task drv_slv_read_req(ref uvma_axil_slv_seq_item_c req);
    
    /**
     * Drives the interface's (cntxt.vif) signals using req's contents.
     */
-   extern task drv_slv_write_req(ref uvma_axil_slv_seq_item_c req);
+   extern virtual task drv_slv_write_req(ref uvma_axil_slv_seq_item_c req);
    
    /**
     * TODO Describe uvma_axil_drv_c::wait_for_rsp()
@@ -109,27 +119,17 @@ class uvma_axil_drv_c extends uvm_driver#(
    /**
     * TODO Describe uvma_axil_drv_c::process_mstr_rsp()
     */
-   extern task process_mstr_rsp(ref uvma_axil_mstr_seq_item_c req, ref uvma_axil_mon_trn_c rsp);
-   
-   /**
-    * Drives the interface's (cntxt.vif) signals using req's contents.
-    */
-   extern task drv_mstr_read_req(ref uvma_axil_mstr_seq_item_c req);
-   
-   /**
-    * Drives the interface's (cntxt.vif) signals using req's contents.
-    */
-   extern task drv_mstr_write_req(ref uvma_axil_mstr_seq_item_c req);
+   extern virtual task process_mstr_rsp(ref uvma_axil_mstr_seq_item_c req, ref uvma_axil_mon_trn_c rsp);
    
    /**
     * TODO Describe uvma_axil_drv_c::drv_mstr_idle()
     */
-   extern task drv_mstr_idle(uvma_axil_access_type_enum access_type);
+   extern virtual task drv_mstr_idle(uvma_axil_access_type_enum access_type);
    
    /**
     * TODO Describe uvma_axil_drv_c::drv_slv_idle()
     */
-   extern task drv_slv_idle(uvma_axil_access_type_enum access_type);
+   extern virtual task drv_slv_idle(uvma_axil_access_type_enum access_type);
    
 endclass : uvma_axil_drv_c
 

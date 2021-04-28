@@ -78,6 +78,7 @@ function void uvmt_axil_st_writes_test_c::check_phase(uvm_phase phase);
       `uvm_error("TEST", $sformatf("Number of scoreboard matches (%0d) does not equal number of writes (%0d)", env_cntxt.sb_cntxt.match_count, writes_vseq.num_writes))
    end
    
-endfunction : check_phase
+endfunction : check_phase
+
 
 `endif // __UVMT_AXIL_ST_WRITES_TEST_SV__

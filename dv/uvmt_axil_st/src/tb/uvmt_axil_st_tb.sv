@@ -21,9 +21,10 @@
 
 
 /**
- * Module encapsulating the AMBA Advanced eXtensible Interface VIP Self-Test DUT wrapper,
- * agents and clock generating interfaces. The clock and reset interface only
- * feeds into the AMBA Advanced eXtensible Interface VIP interfaces.
+ * Module encapsulating the AMBA Advanced eXtensible Interface VIP Self-Test DUT
+ * wrapper, agents and clock generating interfaces. The clock and reset
+ * interfaces only feed into the AMBA Advanced eXtensible Interface VIP
+ * interfaces.
  */
 module uvmt_axil_st_tb;
    
@@ -45,8 +46,13 @@ module uvmt_axil_st_tb;
     * Test bench entry point.
     */
    initial begin
-      // Specify time format for simulation (units_number, precision_number, suffix_string, minimum_field_width)
-      $timeformat(-9, 3, " ns", 18);
+      // Specify time format for simulation
+      $timeformat(
+         /*.units_number       (*/   -9/*)*/,
+         /*.precision_number   (*/    3/*)*/,
+         /*.suffix_string      (*/" ns"/*)*/,
+         /*.minimum_field_width(*/   18/*)*/ 
+      );
       
       // Add interfaces to uvm_config_db
       uvm_config_db#(virtual uvmt_axil_st_clknrst_gen_if)::set(null, "*"               , "clknrst_gen_vif", clknrst_gen_if);
@@ -57,63 +63,6 @@ module uvmt_axil_st_tb;
       uvm_top.enable_print_topology = 1;
       uvm_top.finish_on_completion  = 1;
       uvm_top.run_test();
-   end
-   
-   
-   /**
-    * End-of-test summary printout.
-    */
-   final begin
-      string             summary_string;
-      uvm_report_server  rs;
-      int                err_count;
-      int                fatal_count;
-      static bit         sim_finished = 0;
-      
-      static string  red   = "\033[31m\033[1m";
-      static string  green = "\033[32m\033[1m";
-      static string  reset = "\033[0m";
-      
-      rs          = uvm_top.get_report_server();
-      err_count   = rs.get_severity_count(UVM_ERROR);
-      fatal_count = rs.get_severity_count(UVM_FATAL);
-      
-      void'(uvm_config_db#(bit)::get(null, "", "sim_finished", sim_finished));
-      
-      $display("\n*** Test Summary ***\n");
-      
-      if (sim_finished && (err_count == 0) && (fatal_count == 0)) begin
-         $display("    PPPPPPP    AAAAAA    SSSSSS    SSSSSS   EEEEEEEE  DDDDDDD     ");
-         $display("    PP    PP  AA    AA  SS    SS  SS    SS  EE        DD    DD    ");
-         $display("    PP    PP  AA    AA  SS        SS        EE        DD    DD    ");
-         $display("    PPPPPPP   AAAAAAAA   SSSSSS    SSSSSS   EEEEE     DD    DD    ");
-         $display("    PP        AA    AA        SS        SS  EE        DD    DD    ");
-         $display("    PP        AA    AA  SS    SS  SS    SS  EE        DD    DD    ");
-         $display("    PP        AA    AA   SSSSSS    SSSSSS   EEEEEEEE  DDDDDDD     ");
-         $display("    ----------------------------------------------------------");
-         $display("                        SIMULATION PASSED                     ");
-         $display("    ----------------------------------------------------------");
-      end
-      else begin
-         $display("    FFFFFFFF   AAAAAA   IIIIII  LL        EEEEEEEE  DDDDDDD       ");
-         $display("    FF        AA    AA    II    LL        EE        DD    DD      ");
-         $display("    FF        AA    AA    II    LL        EE        DD    DD      ");
-         $display("    FFFFF     AAAAAAAA    II    LL        EEEEE     DD    DD      ");
-         $display("    FF        AA    AA    II    LL        EE        DD    DD      ");
-         $display("    FF        AA    AA    II    LL        EE        DD    DD      ");
-         $display("    FF        AA    AA  IIIIII  LLLLLLLL  EEEEEEEE  DDDDDDD       ");
-         
-         if (sim_finished == 0) begin
-            $display("    --------------------------------------------------------");
-            $display("                   SIMULATION FAILED - ABORTED              ");
-            $display("    --------------------------------------------------------");
-         end
-         else begin
-            $display("    --------------------------------------------------------");
-            $display("                       SIMULATION FAILED                    ");
-            $display("    --------------------------------------------------------");
-         end
-      end
    end
    
 endmodule : uvmt_axil_st_tb

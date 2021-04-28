@@ -145,7 +145,7 @@ def do_cmp(filelist_path, lib_name):
 def do_elab(lib_name, design_unit):
     if (dbg):
         print("Call to do_elab(lib_name='" + lib_name + "', design_unit='" + design_unit + "')")
-    run_xsim_bin("xelab", design_unit + " --debug all  -relax --O0 -s " + design_unit + " -timescale 1ns/1ps")
+    run_xsim_bin("xelab", design_unit + " uvml_logs_sim_summary --debug all  -relax --O0 -s " + design_unit + " -timescale 1ns/1ps")
 
 
 
