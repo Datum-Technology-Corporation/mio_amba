@@ -34,6 +34,9 @@ class uvma_axil_mon_c extends uvm_monitor;
    uvm_analysis_port#(uvma_axil_mon_trn_c)  ap;
    uvm_analysis_port#(uvma_axil_mon_trn_c)  sequencer_ap;
    
+   // Handles to virtual interface modport
+   virtual uvma_axil_if.passive_mp  vif_passive_mp;
+   
    
    `uvm_component_utils_begin(uvma_axil_mon_c)
       `uvm_field_object(cfg  , UVM_DEFAULT)
@@ -140,6 +143,7 @@ function void uvma_axil_mon_c::build_phase(uvm_phase phase);
    if (!cntxt) begin
       `uvm_fatal("CNTXT", "Context handle is null")
    end
+   vif_passive_mp = cntxt.vif.passive_mp;
    
    ap           = new("ap"          , this);
    sequencer_ap = new("sequencer_ap", this);

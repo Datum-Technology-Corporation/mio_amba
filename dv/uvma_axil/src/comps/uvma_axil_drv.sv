@@ -38,6 +38,10 @@ class uvma_axil_drv_c extends uvm_driver#(
    uvm_analysis_port     #(uvma_axil_slv_seq_item_c )  slv_ap ;
    uvm_tlm_analysis_fifo #(uvma_axil_mon_trn_c      )  mon_trn_fifo;
    
+   // Handles to virtual interface modport
+   virtual uvma_axil_if.active_mstr_mp  vif_mstr_mp;
+   virtual uvma_axil_if.active_slv_mp   vif_slv_mp ;
+   
    
    `uvm_component_utils_begin(uvma_axil_drv_c)
       `uvm_field_object(cfg  , UVM_DEFAULT)
@@ -150,6 +154,8 @@ function void uvma_axil_drv_c::build_phase(uvm_phase phase);
       `uvm_fatal("CFG", "Configuration handle is null")
    end
    uvm_config_db#(uvma_axil_cfg_c)::set(this, "*", "cfg", cfg);
+   vif_mstr_mp = cntxt.vif.active_mstr_mp;
+   vif_slv_mp  = cntxt.vif.active_slv_mp ;
    
    void'(uvm_config_db#(uvma_axil_cntxt_c)::get(this, "", "cntxt", cntxt));
    if (!cntxt) begin
